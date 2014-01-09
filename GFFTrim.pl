@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 # GFFTrim - Keith H. Turner - Whiteley Lab
 # Takes a GFF file and returns a GFF file with the specified amount trimmed from the 3p or 5p ends
 # 11/26/12
@@ -47,9 +47,8 @@ sub usage() {
 print<<EOF;
 GFFTrim, by Keith H. Turner (khturner@utexas.edu), Nov 26, 2012
 
-This program takes a GFF file corresponding to all features in a genome, creates a file
-derived from it containing only those features with type "gene" (suffixed ".genes.gff"),
-and creates a second file derived from that first one that truncates the "gene" features
+This program takes a GFF file corresponding to all features in a genome
+and creates a second file derived from that first one that truncates all features
 by a specified percentage off of the 5' and 3' ends (suffixed ".trunc.gff").
 
 usage: $0 (5p) (3p) (file).gff

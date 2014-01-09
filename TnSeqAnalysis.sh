@@ -129,4 +129,4 @@ rm $OUT_PFX-newsites.txt
 
 # Smoothing (LOESS) and normalization (TMM)
 echo "Performing LOESS smoothing, normalization and differential abundance analysis on count data..."
-R --vanilla --args $CONTROL_PFX $CONTROL_REPS $TEST_PFX $TEST_REPS $ASSEMBLY_PFX $OUT_PFX < ~/local/bin/TnSeqDESeq3.R > /dev/null 2> /dev/null
+R --vanilla --args $CONTROL_PFX $CONTROL_REPS $TEST_PFX $TEST_REPS $ASSEMBLY_PFX $OUT_PFX < ~/local/bin/TnSeqDESeq.R > /dev/null 2> /dev/null
