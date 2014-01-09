@@ -98,6 +98,18 @@ Dependencies:
 
 -trimmer (this package) should be available through your $PATH
 
+-flexbar (http://sourceforge.net/projects/flexbar/)
+
+-the file "~/adapters/3_adapter_seq.fasta" should specify the Illumina adapters:
+
+\>index_sp
+
+AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC
+
+\>3_adapter_seq
+
+TCGTATGCCGTCTTCTGCTTG
+
 
 GFFTrim.pl
 ===========
