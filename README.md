@@ -27,7 +27,7 @@ insertion site locations and read counts are tallied. All results and run
 information is put in a directory named for your files, and these results can be
 fed directly into TnSeqAnalysis.sh (see below).
 
-Usage: ./TnSeq.sh [-p \<primer seq\>] [-i \<IR seq\>] [-a \<assembly\>] \<pfx\>
+Usage: ./TnSeq.sh [-p \<primer seq\>] [-i \<IR seq\>] [-a \<assembly\>] [-m \<#\>] \<pfx\>
 
 Arguments:
 
@@ -37,6 +37,8 @@ Arguments:
    authentication)
 
 \<assembly\>   - The name of the assembly you're using (e.g. "PAO1")
+
+-m \<#\>     - The number of mismatches/indels you want to tolerate during search
 
 \<pfx\>        - the file prefix for your sequence files (If your sequence files are
    named condition1_R1.fastq and condition1_R2.fastq, the prefix is "condition1")
@@ -81,7 +83,7 @@ mapped to your genome with bowtie2. Finally, insertion site locations and read
 counts are tallied. All results and run information is put in a directory named for
 your files, and these results can be fed directly into TnSeqAnalysis.sh (see below).
 
-Usage: ./TnSeq2.sh [-p \<primer seq\>] [-i \<IR seq\>] [-a \<assembly\>] \<pfx\>
+Usage: ./TnSeq2.sh [-p \<primer seq\>] [-i \<IR seq\>] [-a \<assembly\>] [-m \<#\>] \<pfx\>
 
 Arguments:
 
@@ -91,6 +93,8 @@ Arguments:
    authentication)
 
 \<assembly\>   - The name of the assembly you're using (e.g. "PAO1")
+
+-m \<#\>     - The number of mismatches/indels you want to tolerate during search
 
 \<pfx\>        - the file prefix for your sequence files (If your sequence file is
    named condition1_R1.fastq, the prefix is "condition1")
