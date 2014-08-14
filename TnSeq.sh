@@ -1,26 +1,29 @@
 #!/usr/bin/env bash
 #This requires fqgrep (https://github.com/indraniel/fqgrep)
 usage () {
-  echo "usage: $0 [-p <primer seq>] [-i <IR seq>] [-a <assembly>] <pfx> "
+  echo "usage: $0 [-p <primer seq>] [-i <IR seq>] [-a <assembly>] [-m <#>] <pfx> "
   echo "Required parameters:"
   echo "-p     The sequence of your Tn-seq primer specific to your transposon"
   echo "-i     The sequence of the transposon end sequence remaining (for junction authentication)"
   echo "-a     The name of the assembly you're using (PAO1)"
+  echo "-m     The number of mismatches/indels you want to tolerate during search"
+
   echo ""
   echo "The required parameters must precede the file prefix for your sequence files:"
   echo "  (e.g. if your sequence files are named condition1_R1.fastq and condition1_R2.fastq,"
   echo "   the prefix is \"condition1\")"
   echo ""
   echo "Example:"
-  echo "$0 -p GGATGGAAAACGGGAAAGGTTCCGTCCAGGACGCTACTTGTG -i TATAAGAGTCAG -a PAO1 condition1"
+  echo "$0 -p GGATGGAAAACGGGAAAGGTTCCGTCCAGGACGCTACTTGTG -i TATAAGAGTCAG -a PAO1 -m 1 condition1"
 }
 
 # Read in the important options
-while getopts ":p:i:a:" option; do
+while getopts ":p:i:a:m:" option; do
   case "$option" in
 	p)  PRIMER="$OPTARG" ;;
   	i)  IR="$OPTARG" ;;
   	a)  ASSEMBLY="$OPTARG" ;;
+  	m)  MISMATCHES="$OPTARG" ;;
     h)  # it's always useful to provide some help 
         usage
         exit 0 
@@ -56,6 +59,12 @@ if [ -z "$ASSEMBLY" ]; then
   exit 1
 fi
 
+if [ -z "$MISMATCHES" ]; then
+  echo "Error: you must specify a number of mismatches using -m"
+  usage
+  exit 1
+fi
+
 # Give the usage if there aren't enough parameters
 if [ $# -lt 1 ] ; then
   echo "you must provide a file prefix for analysis"
@@ -66,7 +75,6 @@ fi
 PREFIX=$1
 R1=${PREFIX}_R1
 R2=${PREFIX}_R2
-MISMATCHES=1 # How many mismatches you want to tolerate for your searching
 BOWTIEREF=$REFGENOME/$ASSEMBLY/$ASSEMBLY
 
 echo "Performing TnSeq analysis on $PREFIX..."
@@ -91,8 +99,6 @@ let "MIN = ${#PRIMER} + 2"
 let "MAX = ${#PRIMER} + 12"
 fqgrep -m $MISMATCHES -r -p $IR $R1.fastq | awk -v min=$MIN -v max=$MAX -F "\t" '(($7 >= min && $7 <= max) || $1=="read name")' | trimmer --5-prime > $PREFIX-IR-clip.fastq
 fqgrep -m $MISMATCHES -r -p $IR $R2.fastq | awk -v min=$MIN -v max=$MAX -F "\t" '(($7 >= min && $7 <= max) || $1=="read name")' | trimmer --5-prime >> $PREFIX-IR-clip.fastq
-flexbar -f fastq-i1.8 -n 16 -ao 8 -m 18 -z 25 -ae RIGHT -a ~/adapters/3_adapter_seq.fasta -r $PREFIX-IR-clip.fastq -t $PREFIX-IR-clip.trim >> /dev/null 2>&1
-mv $PREFIX-IR-clip.trim.fastq $PREFIX-IR-clip.fastq
 IRSFOUND=$(egrep -c '^@HWI|^@M' $PREFIX-IR-clip.fastq)
 echo "Molecules with IR in right location:" >> $PREFIX-TnSeq.txt
 echo $IRSFOUND >> $PREFIX-TnSeq.txt

@@ -17,9 +17,10 @@ for (i in 3:(length(sites.ordered))) {
 }
 rm(newmatrix, i)
 
-gff <- read.delim(file=paste(Args[5], ".trunc.gff", sep=""), sep="\t")
+gff <- read.delim(file=paste(Args[5], ".trunc.gff", sep=""), sep="\t", fill=TRUE)
 colnames(gff) <- c("seqname", "source", "feature", "start", "end", "score", "strand", "frame", "att", "x")
 gff <- tail(gff, n=-5)
+gff <- gff[(gff$feature=="gene"),]
 library(DESeq)
 sitescds <- newCountDataSet(round(countsmatrix), c(rep(Args[1], as.numeric(Args[2])), rep(Args[3], as.numeric(Args[4]))))
 sitescds <- estimateSizeFactors(sitescds)
@@ -43,6 +44,7 @@ for (c in 2:length(counts.norm[1,])) {
 }
 
 line <- 1
+
 for (r in 1:length(counts.norm[,1])) {
 	pos <- counts.norm[r,1]
 	while (line <= length(gff$start) & gff$start[line] <= pos) {
@@ -56,7 +58,10 @@ for (r in 1:length(counts.norm[,1])) {
 		}
 		line <- line + 1
 	}
-	while (line > 1 & gff$start[line] > pos) {
+	if (line > 1) {
+		line <- line - 1
+	}
+	while (line > 1 & gff$start[line] > pos) { ###
 		line <- line - 1
 	}
 }
@@ -66,8 +71,18 @@ for (i in 11:(length(gff[1,]))) {
 	newmatrix <- cbind(genecounts, gff[,i])
 	genecounts <- newmatrix
 }
-genes <- read.delim(file=paste(Args[5], ".gene.products.kegg.txt", sep=""), sep="\t", header=TRUE)
-rownames(genecounts) <- genes$Locus
+
+#uncomment this section if you have a kegg annotation description file of the genes and their products
+#genes <- read.delim(file=paste(Args[5], ".gene.products.kegg.txt", sep=""), sep="\t", header=TRUE)
+#rownames(genecounts) <- genes$Locus
+
+#uncomment this section if you do not have a kegg annotation description file of the genes and their products
+genes <- matrix("", length(gff[,1]), 2)
+for (i in 1:length(gff[,1])) {
+	genes[i,1] <- strsplit(grep("locus_tag",strsplit(as.character(gff$att[i]),";")[[1]], value=T),"=")[[1]][2]
+	genes[i,2] <- strsplit(grep("product",strsplit(as.character(gff$att[i]),";")[[1]], value=T),"=")[[1]][2]
+}
+
 colnames(genecounts) <- colnames(gff)[10:length(gff)]
 colnames(counts.norm) <- c("Position", colnames(gff)[10:length(gff)])
 colnames(numsites) <- colnames(gff)[10:length(gff)]
@@ -78,7 +93,9 @@ genescds <- estimateDispersions(genescds)
 res <- nbinomTest(genescds, Args[1], Args[3])
 colnames(res)[3] <- paste(Args[1], "Mean", sep="")
 colnames(res)[4] <- paste(Args[3], "Mean", sep="")
-res <- cbind(res, genes[,2:5], numsites)
+
+#res <- cbind(res, genes[,2:5], numsites) #uncomment if you have a kegg annotation
+res <- cbind(res, genes[,2:3], numsites) #uncomment if you do not have a kegg annotation
 
 write.table(counts.norm, file=paste(Args[6], ".sites.counts.tsv", sep=""), quote=FALSE, row.names=FALSE, sep="\t")
 write.table(res, file=paste(Args[6], ".DESeq.tsv", sep=""), quote=FALSE, row.names=FALSE, sep="\t")

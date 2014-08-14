@@ -1,7 +1,4 @@
 #!/usr/bin/env perl
-# PullKegg - Keith H. Turner - Whiteley Lab
-# Takes a GFF file on STDIN, searches KEGG for the locus_tag and returns a new GFF file with KO and Kegg pathway information on STDOUT.
-# 9/15/13
 
 sub usage();
 if ($ARGV[0] =~ /-h/ || $ARGV[0] =~ /--help/) {
