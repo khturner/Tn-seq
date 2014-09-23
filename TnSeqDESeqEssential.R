@@ -85,8 +85,7 @@ TnSeqDESeqEssential <- function(ctrl_pfx, ctrl_reps, gff_pfx, out_pfx, to_trim, 
 	# Uncomment this section if you have a kegg annotation description file of the genes and their products
 	genes <- read.delim(file=paste(gff_pfx, ".gene.products.kegg.txt", sep=""), sep="\t", header=TRUE)
 	rownames(genecounts) <- genes$Locus
-	write.table(genecounts, paste(out_pfx, ".genecounts.tsv", sep=""), quote=FALSE, sep="\t")
-
+	
 	
 	# Uncomment this section if you DO NOT have a kegg annotation description file of the genes and their products
 	#genes <- matrix("", length(gff[,1]), 2)
@@ -94,8 +93,7 @@ TnSeqDESeqEssential <- function(ctrl_pfx, ctrl_reps, gff_pfx, out_pfx, to_trim, 
 	#	genes[i,1] <- strsplit(grep("locus_tag",strsplit(as.character(gff$att[i]),";")[[1]], value=T),"=")[[1]][2]
 	#	genes[i,2] <- strsplit(grep("product",strsplit(as.character(gff$att[i]),";")[[1]], value=T),"=")[[1]][2]
 	#}
-	#write.table(genecounts, paste(out_pfx, ".rawcounts.tsv", sep=""), quote=FALSE, sep="\t")
-
+	write.table(genecounts, paste(out_pfx, ".genecounts.tsv", sep=""), quote=FALSE, sep="\t")
 
 	# Perform differential fitness analysis
 	colnames(numsites) <- colnames(gff)[10:length(gff)]
