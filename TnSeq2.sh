@@ -74,13 +74,12 @@ fi
 
 PREFIX=$1
 R1=${PREFIX}_R1
-MISMATCHES=1 # How many mismatches you want to tolerate for your searching
 BOWTIEREF=$REFGENOME/$ASSEMBLY/$ASSEMBLY
 
 echo "Performing TnSeq analysis on $PREFIX..."
 echo "TnSeq processing stats for $PREFIX" > $PREFIX-TnSeq.txt
 echo "Total sequences: " >> $PREFIX-TnSeq.txt
-egrep -c '^@HWI|^@M' $R1.fastq >> $PREFIX-TnSeq.txt
+egrep -c '^@HWI|^@M|^@NS|^@SRR' $R1.fastq >> $PREFIX-TnSeq.txt
 
 # Reads with primer
 echo "$PREFIX: Searching for reads with primer..."
@@ -92,9 +91,9 @@ echo $PRIMERCOUNT >> $PREFIX-TnSeq.txt
 
 # IRs
 echo "$PREFIX: Searching for reads with an IR in right location..."
-let "MIN = ${#PRIMER} - 1"
-let "MAX = ${#PRIMER} + 7"
-fqgrep -m $MISMATCHES -r -p $IR $R1.fastq | awk -v min=$MIN -v max=$MAX -F "\t" '(($7 >= min && $7 <= max) || $1=="read name")' | trimmer --5-prime > $PREFIX-IR-clip.fastq
+let "MIN = ${#PRIMER} + ${#IR} + 2"
+let "MAX = ${#PRIMER} + ${#IR} + 8"
+fqgrep -m $MISMATCHES -r -p $PRIMER$IR $R1.fastq | awk -v min=$MIN -v max=$MAX -F "\t" '(($8 >= min && $8 <= max) || $1=="read name")' | trimmer --5-prime > $PREFIX-IR-clip.fastq
 flexbar -f fastq-i1.8 -n 16 -ao 8 -m 18 -z 25 -ae RIGHT -a ~/adapters/3_adapter_seq.fasta -r $PREFIX-IR-clip.fastq -t $PREFIX-IR-clip.trim >> /dev/null 2>&1
 mv $PREFIX-IR-clip.trim.fastq $PREFIX-IR-clip.fastq
 IRSFOUND=$(egrep -c '^@HWI|^@M' $PREFIX-IR-clip.fastq)

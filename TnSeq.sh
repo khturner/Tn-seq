@@ -80,7 +80,7 @@ BOWTIEREF=$REFGENOME/$ASSEMBLY/$ASSEMBLY
 echo "Performing TnSeq analysis on $PREFIX..."
 echo "TnSeq processing stats for $PREFIX" > $PREFIX-TnSeq.txt
 echo "Total sequences: " >> $PREFIX-TnSeq.txt
-egrep -c '^@HWI|^@M' $R1.fastq >> $PREFIX-TnSeq.txt
+egrep -c '^@HWI|^@M|^@NS|^@SRR' $R1.fastq >> $PREFIX-TnSeq.txt
 
 # Reads with primer
 echo "$PREFIX: Searching for reads with primer..."
@@ -95,11 +95,11 @@ echo $PRIMERCOUNT >> $PREFIX-TnSeq.txt
 
 # IRs
 echo "$PREFIX: Searching for reads with an IR in right location..."
-let "MIN = ${#PRIMER} + 2"
-let "MAX = ${#PRIMER} + 12"
-fqgrep -m $MISMATCHES -r -p $IR $R1.fastq | awk -v min=$MIN -v max=$MAX -F "\t" '(($7 >= min && $7 <= max) || $1=="read name")' | trimmer --5-prime > $PREFIX-IR-clip.fastq
-fqgrep -m $MISMATCHES -r -p $IR $R2.fastq | awk -v min=$MIN -v max=$MAX -F "\t" '(($7 >= min && $7 <= max) || $1=="read name")' | trimmer --5-prime >> $PREFIX-IR-clip.fastq
-IRSFOUND=$(egrep -c '^@HWI|^@M' $PREFIX-IR-clip.fastq)
+let "MIN = ${#PRIMER} + ${#IR} + 6"
+let "MAX = ${#PRIMER} + ${#IR} + 10"
+fqgrep -m $MISMATCHES -r -p $PRIMER$IR $R1.fastq | awk -v min=$MIN -v max=$MAX -F "\t" '(($8 >= min && $8 <= max) || $1=="read name")' | trimmer --5-prime > $PREFIX-IR-clip.fastq
+fqgrep -m $MISMATCHES -r -p $PRIMER$IR $R2.fastq | awk -v min=$MIN -v max=$MAX -F "\t" '(($8 >= min && $8 <= max) || $1=="read name")' | trimmer --5-prime >> $PREFIX-IR-clip.fastq
+IRSFOUND=$(egrep -c '^@HWI|^@M|^@NS|^@SRR' $PREFIX-IR-clip.fastq)
 echo "Molecules with IR in right location:" >> $PREFIX-TnSeq.txt
 echo $IRSFOUND >> $PREFIX-TnSeq.txt
 
