@@ -204,13 +204,91 @@ Dependencies:
    
 -R (http://www.r-project.org/)
 
+-Perl (http://www.perl.org/)
+
 -TnSeqDESeq.R (this package) placed in ~/local/bin/
+   -NOTE: Please have a look inside TnSeqDESeq.R at lines 16-18 and lines 73-83.
+   There are some lines you may want to change to introduce features such as filtering
+   sites based on reliable identification of those sites in replicate samples, or
+   automated annotation of gene names from your GFF file. Please contact Keith
+   Turner (khturner@utexas.edu) with questions.
 
--DESeq (CRAN)
+-TnGeneBin.pl (this package) placed in ~/local/bin/
 
--(assembly).gene.products.kegg.txt, a tab-separated file containing any annotation
-   information you want automatically appended to your DESeq results file. This is
-   so named because our file includes (locus)-(gene name)-(product)-(KEGG
+-DESeq (http://bioconductor.org/packages/release/bioc/html/DESeq.html)
+
+-dplyr (CRAN)
+
+-Optional: (assembly).gene.products.kegg.txt, a tab-separated file containing any
+   annotation information you want automatically appended to your DESeq results file.
+   This is so named because our file includes (locus)-(gene name)-(product)-(KEGG
+   Orthology number)-(KEGG Pathway) information, but you can include whatever you'd
+   like. If you want to change the name of this file, also do so on TnSeqDESeq.R
+   line 69. This file should be in the location described above.
+
+TnSeqAnalysis.sh
+===========
+This script takes the results of TnSeq.sh or TnSeq2.sh for sequence files derived
+from one or more replicates of a single condition that you wish to analyze for
+significant absence of mutants in all genes in your genome. The insertion site locations
+and read counts data is smoothed with LOESS smoothing (to correct for genomic position-
+dependent effects on apparent insertion abundance), and used as the basis for the
+generation of a number of pseudodatasets that specify an "expected" number of Tn-derived
+reads per gene, using the null hypothesis that no inserts affect fitness. Real and
+pseudo-data are normalized with DESeq, the number of reads per gene and the number of
+independent insertions identified per gene is tallied, and differential mutant abundance
+is calculated using a negative binomial test.
+
+Usage: ./TnSeqAnalysis.sh [-i \<#\>] [-e \<#\>] [-a \<assembly\>] [-o \<output\>] [-c \<name\>]
+   [-x \<#\>] \<pfx1\> \<pfx2\> \<pfx3\> ... \<pfxn\>
+
+Arguments:
+
+-i \<#\>     - The number of the most represented sites to ignore
+
+-e \<#\>     - The number of simulated pseudodatasets you want to generate (warning, this
+   increases execution time exponentially. Try starting with 5 and see how long it takes).
+
+\<assembly\> - The name of the assembly you're using (e.g. "PAO1")
+
+\<output\>   - The name for the output file
+
+-c \<name\>  - The name for the control condition
+
+-x \<#\>     - The number of replicates for the control condition
+
+\<pfx#\>     - The file prefixes to be considered, listed with the control conditions
+   followed by the test conditions (e.g. "./TnSeqAnalysis.sh -i 50 -a PAO1
+   -o Example -c control -x 2 -t test -y 2 C1 C2 T1 T2")
+
+Dependencies:
+
+-$REFGENOME defined in your environment. This should specify a directory that
+   contains your genome annotations in GFF format in a subdirectory with the same
+   name as the genome. (e.g. if $REFGENOME is "/home/user/ref_genome", then the
+   files "/home/user/ref_genome/PAO1/PAO1.trunc.gff" and 
+   "/home/user/ref_genome/PAO1/PAO1.gene.products.kegg.txt" should be present)
+   
+-R (http://www.r-project.org/)
+
+-Perl (http://www.perl.org/)
+
+-TnSeqDESeqEssential.R (this package) placed in ~/local/bin/
+   -NOTE: Please have a look inside TnSeqDESeq.R at lines 16-18 and lines 85-95.
+   There are some lines you may want to change to introduce features such as filtering
+   sites based on reliable identification of those sites in replicate samples, or
+   automated annotation of gene names from your GFF file. Please contact Keith
+   Turner (khturner@utexas.edu) with questions.
+
+-TnGeneBin.pl (this package) placed in ~/local/bin/
+
+-DESeq (http://bioconductor.org/packages/release/bioc/html/DESeq.html)
+
+-dplyr (CRAN)
+
+-Optional: (assembly).gene.products.kegg.txt, a tab-separated file containing any
+   annotation information you want automatically appended to your DESeq results file.
+   This is so named because our file includes (locus)-(gene name)-(product)-(KEGG
    Orthology number)-(KEGG Pathway) information, but you can include whatever you'd
    like. If you want to change the name of this file, also do so on TnSeqDESeq.R
    line 69. This file should be in the location described above.
