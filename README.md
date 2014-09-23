@@ -226,7 +226,7 @@ Dependencies:
    like. If you want to change the name of this file, also do so on TnSeqDESeq.R
    line 69. This file should be in the location described above.
 
-TnSeqAnalysis.sh
+TnSeqEssential.sh
 ===========
 This script takes the results of TnSeq.sh or TnSeq2.sh for sequence files derived
 from one or more replicates of a single condition that you wish to analyze for
@@ -239,7 +239,7 @@ pseudo-data are normalized with DESeq, the number of reads per gene and the numb
 independent insertions identified per gene is tallied, and differential mutant abundance
 is calculated using a negative binomial test.
 
-Usage: ./TnSeqAnalysis.sh [-i \<#\>] [-e \<#\>] [-a \<assembly\>] [-o \<output\>] [-c \<name\>]
+Usage: ./TnSeqEssential.sh [-i \<#\>] [-e \<#\>] [-a \<assembly\>] [-o \<output\>] [-c \<name\>]
    [-x \<#\>] \<pfx1\> \<pfx2\> \<pfx3\> ... \<pfxn\>
 
 Arguments:
