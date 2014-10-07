@@ -115,10 +115,10 @@ TnSeqDESeqEssential <- function(ctrl_pfx, ctrl_reps, gff_pfx, out_pfx, to_trim, 
 	category <- rep("",length(out$id))
 	for (i in 1:length(out$id)) {
 		if (fit$classification[i] == 1 & out$log2FoldChange[i] < 0) {
-			category[i] <- "Essential"
+			category[i] <- "Reduced"
 		}
 		else {
-			category[i] <- "Non-essential"
+			category[i] <- "Unchanged"
 		}
 	}
 	fit$uncertainty[which(out$log2FoldChange > 0)] <- 0
