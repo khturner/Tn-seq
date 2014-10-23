@@ -94,7 +94,7 @@ echo "$PREFIX: Searching for reads with an IR in right location..."
 let "MIN = ${#PRIMER} + ${#IR} + 2"
 let "MAX = ${#PRIMER} + ${#IR} + 8"
 fqgrep -m $MISMATCHES -r -p $PRIMER$IR $R1.fastq | awk -v min=$MIN -v max=$MAX -F "\t" '(($8 >= min && $8 <= max) || $1=="read name")' | trimmer --5-prime > $PREFIX-IR-clip.fastq
-flexbar -f fastq-i1.8 -n 16 -ao 8 -m 18 -z 25 -ae RIGHT -a ~/adapters/3_adapter_seq.fasta -r $PREFIX-IR-clip.fastq -t $PREFIX-IR-clip.trim >> /dev/null 2>&1
+flexbar -f fastq-i1.8 -n 16 -ao 8 -m 18 -z 35 -ae RIGHT -a ~/adapters/3_adapter_seq.fasta -r $PREFIX-IR-clip.fastq -t $PREFIX-IR-clip.trim >> /dev/null 2>&1
 mv $PREFIX-IR-clip.trim.fastq $PREFIX-IR-clip.fastq
 IRSFOUND=$(egrep -c '^@HWI|^@M' $PREFIX-IR-clip.fastq)
 echo "Molecules with IR in right location:" >> $PREFIX-TnSeq.txt
@@ -103,11 +103,11 @@ echo $IRSFOUND >> $PREFIX-TnSeq.txt
 # Map and convert - feel free to change bowtie2 parameters yourself
 echo "$PREFIX: Mapping with Bowtie2..."
 echo "Bowtie2 report:" >> $PREFIX-TnSeq.txt
-bowtie2 --end-to-end -p 16 -x $BOWTIEREF -U $PREFIX-IR-clip.fastq -S $PREFIX.sam 2>> $PREFIX-TnSeq.txt
+bowtie2 --end-to-end -p 16 -a -x $BOWTIEREF -U $PREFIX-IR-clip.fastq -S $PREFIX.sam 2>> $PREFIX-TnSeq.txt
 grep '^@' $PREFIX.sam > $PREFIX-mapped.sam
-cat $PREFIX.sam | awk -F "\t" '((and($2, 0x4) != 0x4) && ($5 > 35))' >> $PREFIX-mapped.sam
-echo "Number of reads mapping at high enough MAPQ:" >> $PREFIX-TnSeq.txt
-grep -v '^@' $PREFIX-mapped.sam | wc -l >> $PREFIX-TnSeq.txt
+cat $PREFIX.sam | grep -v '^@' | awk -F "\t" '(and($2, 0x4) != 0x4)' | sort -u -k1,1 >> $PREFIX-mapped.sam
+echo "Number of reads mapping at high enough score:" >> $PREFIX-TnSeq.txt
+cat $PREFIX-mapped.sam | wc -l >> $PREFIX-TnSeq.txt
 echo "$PREFIX: Tallying mapping results..."
 grep -v '^@' $PREFIX-mapped.sam | awk -F "\t" 'and($2, 0x100) != 0x100 {if (and($2, 0x10) != 0x10) print $4; else print $4+length($10)}' | grep '[0-9]' | sort | uniq -c | sort -n -r > $PREFIX-sites.txt
 echo "Number of insertion sites identified:" >> $PREFIX-TnSeq.txt
