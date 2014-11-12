@@ -253,13 +253,13 @@ Arguments:
 
 \<output\>   - The name for the output file
 
--c \<name\>  - The name for the control condition
+-c \<name\>  - The name for the test condition
 
--x \<#\>     - The number of replicates for the control condition
+-x \<#\>     - The number of replicates for the test condition
 
 \<pfx#\>     - The file prefixes to be considered, listed with the control conditions
-   followed by the test conditions (e.g. "./TnSeqAnalysis.sh -i 50 -a PAO1
-   -o Example -c control -x 2 -t test -y 2 C1 C2 T1 T2")
+   followed by the test conditions (e.g. "./TnSeqEssential.sh -i 50 -a PAO1
+   -o Example -c condition -x 2 C1 C2")
 
 Dependencies:
 
