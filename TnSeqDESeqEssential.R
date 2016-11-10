@@ -16,13 +16,13 @@ TnSeqDESeqEssential <- function(ctrl_pfx, ctrl_reps, gff_pfx, out_pfx, to_trim, 
 	# OPTIONAL - perform site filtering. Example: only consider sites identified in both of 2 replicates
 	#sites <- sites %>% mutate(numreps = (V1 > 0) + (V2 > 0)) %>% filter(numreps == 2)
 	#sites <- sites[-4]
-	
+
 	# LOESS smooth data
 	for (i in 2:(length(sites))) { 
-		counts.loess <- loess(sites[,i] ~ sites$Pos, span=1, data.frame(x=sites$Pos, y=sites[,i]), control=loess.control(statistics=c("approximate"),trace.hat=c("approximate")))
+		counts.loess <- loess(sites[[i]] ~ sites$Pos, span=1, data.frame(x=sites$Pos, y=sites[[i]]), control=loess.control(statistics=c("approximate"),trace.hat=c("approximate")))
 		counts.predict <- predict(counts.loess, data.frame(x=sites$Pos))
 		counts.ratio <- counts.predict/median(counts.predict)
-	    sites[,i] <- sites[,i]/counts.ratio
+	    sites[[i]] <- sites[[i]]/counts.ratio
 	}
 
 	# Normalize data by reads/site
