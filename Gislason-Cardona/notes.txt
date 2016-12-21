@@ -1,0 +1,20 @@
+12/21/16 intro chat
+
+There is a paper already for B cenocepacia - ~400-500 essential genes (sounds about right)
+
+The overall idea is to get a picked, reduced complexity library of rhamnose-dependent Tn mutants (the Tn has a rhamnose-inducible promoter on it)
+  -Tns that have inserted upstream of an essential gene
+  -Eventually they'll use this library to ID antibiotic targets (is a strain much more susceptible to the Ab with low/no rhamnose?)
+
+Main problem here is they want to first ID the essential genome so they can tell if their library is right, and eventually if a mutant in this collection shows the phenotpe they want, what's the target gene?
+
+Tnseq libraries:
+2 runs of a 500k transconjugant library
+  -high redundancy, wrong GC - I think April said this was run with Larry Gallagher's TnCircle method
+ran again - 1m exconjugants, Kapa method (?)
+  -120k/140k sites, but there are some cold spots...biological?
+  -Ended up ID'ing 680ish essential genes with their in-house script - what's going wrong?
+
+-April is using her own laptop for the work-
+-Email April after the holidays - we'll work off a shared git repo and probably put the data in S3
+
