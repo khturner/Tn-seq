@@ -11,10 +11,21 @@ Main problem here is they want to first ID the essential genome so they can tell
 Tnseq libraries:
 2 runs of a 500k transconjugant library
   -high redundancy, wrong GC - I think April said this was run with Larry Gallagher's TnCircle method
-ran again - 1m exconjugants, Kapa method (?)
+ran again - 1m exconjugants, used Kapa polymerase for this one, better
   -120k/140k sites, but there are some cold spots...biological?
   -Ended up ID'ing 680ish essential genes with their in-house script - what's going wrong?
 
 -April is using her own laptop for the work-
 -Email April after the holidays - we'll work off a shared git repo and probably put the data in S3
 
+1/23/17 - Keith and April catchup
+-April has been able to upload files to S3 and get at the git repo
+-GOAL of project is to run the essential script on their internal cepocepacia genome (K56-2)
+-There are two seq runs, she'll upload the fastq files to S3
+-She'll also upload a draft genome of their lab strain - 17 contigs, representing 3 chromosomes and one plasmid
+  -Could represent a challenge for LOESS smoothing - can we scaffold?
+    -The J2315 genome is the most closely related closed genome
+    -PyScaf could work here: https://github.com/lpryszcz/pyScaf#reference-based-scaffolding
+-Finally, she'll upload a little txt file with the transposon and primer seqs
+-Keith will work as much as possible in the git repo so work is recorded
+  -Spin up a new EC2 instance, clone this repo, run setup.sh to install required tools
