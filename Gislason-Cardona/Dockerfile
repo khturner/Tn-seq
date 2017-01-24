@@ -25,8 +25,8 @@ RUN gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9
 RUN gpg -a --export E084DAB9 | sudo apt-key add -
 
 # Install key software and dependencies with apt-get
-RUN sudo apt-get update
-RUN sudo apt-get install r-base r-base-dev \ # R is king
+RUN sudo apt-get -y update
+RUN sudo apt-get install -y r-base r-base-dev \ # R is king
 gdebi-core \ # Dependency for Rstudio Server
 bowtie2 \ # For mapping
 libtre-dev libtre5 zlib1g zlib1g-dev \ # Dependencies for fqgrep
