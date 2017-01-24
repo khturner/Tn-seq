@@ -20,13 +20,13 @@ FROM ubuntu:latest
 MAINTAINER Keith H. Turner "khturner@gmail.com"
 
 # Edit sources to install R
-RUN sudo echo "deb http://cran.rstudio.com/bin/linux/ubuntu xenial/" | sudo tee -a /etc/apt/sources.list
+RUN echo "deb http://cran.rstudio.com/bin/linux/ubuntu xenial/" | tee -a /etc/apt/sources.list
 RUN gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9
-RUN gpg -a --export E084DAB9 | sudo apt-key add -
+RUN gpg -a --export E084DAB9 | apt-key add -
 
 # Install key software and dependencies with apt-get
-RUN sudo apt-get -y update
-RUN sudo apt-get install -y r-base r-base-dev \ # R is king
+RUN apt-get -y update
+RUN apt-get install -y r-base r-base-dev \ # R is king
 gdebi-core \ # Dependency for Rstudio Server
 bowtie2 \ # For mapping
 libtre-dev libtre5 zlib1g zlib1g-dev \ # Dependencies for fqgrep
@@ -34,7 +34,7 @@ wget git # Other tools
 
 # Install Rstudio Server for interactive analyses
 RUN wget https://download2.rstudio.org/rstudio-server-1.0.136-amd64.deb
-RUN sudo gdebi rstudio-server-1.0.136-amd64.deb
+RUN gdebi rstudio-server-1.0.136-amd64.deb
 
 # FQGrep for read searching/filtering
 RUN git clone https://github.com/indraniel/fqgrep.git && cd fqgrep && make && cd ..
