@@ -26,11 +26,7 @@ RUN gpg -a --export E084DAB9 | apt-key add -
 
 # Install key software and dependencies with apt-get
 RUN apt-get -y update
-RUN apt-get install -y r-base r-base-dev \ # R is king
-gdebi-core \ # Dependency for Rstudio Server
-bowtie2 \ # For mapping
-libtre-dev libtre5 zlib1g zlib1g-dev \ # Dependencies for fqgrep
-wget git # Other tools
+RUN apt-get install -y r-base r-base-dev gdebi-core bowtie2 libtre-dev libtre5 zlib1g zlib1g-dev wget git
 
 # Install Rstudio Server for interactive analyses
 RUN wget https://download2.rstudio.org/rstudio-server-1.0.136-amd64.deb
