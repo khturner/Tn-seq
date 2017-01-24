@@ -13,8 +13,9 @@
 ### sudo service docker start
 ### sudo docker login
 
-# And finally build the docker image
-### docker build -t khturner/Tn-seq Tn-seq/Gislason-Cardona/
+# And finally build the docker image and push it
+### docker build -t khturner/tn-seq Tn-seq/Gislason-Cardona/
+### sudo docker push khturner/tn-seq
 
 FROM ubuntu:latest
 MAINTAINER Keith H. Turner "khturner@gmail.com"
