@@ -45,6 +45,7 @@ if args.read2 is not None:
 #print('Reads with primer: ' + str(reads_with_primer))
 
 # Filter reads containing the expected Tn end
+# Done for the night 11/24 - something's screwy here with this damn pipe
 print('### ' + time.strftime("%c") + ' ###')
 print('Searching for reads with an inverted repeat in the proper position on the read...')
 min_ir_position = len(args.primer) + len(args.invertedrepeat) - 2
