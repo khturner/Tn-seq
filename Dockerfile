@@ -19,6 +19,7 @@
 
 FROM ubuntu:latest
 MAINTAINER Keith H. Turner "khturner@gmail.com"
+WORKDIR /root
 
 # Edit sources to install R
 RUN echo "deb http://cran.rstudio.com/bin/linux/ubuntu xenial/" | tee -a /etc/apt/sources.list
@@ -36,6 +37,11 @@ RUN gdebi rstudio-server-1.0.136-amd64.deb
 # FQGrep for read searching/filtering
 RUN git clone https://github.com/indraniel/fqgrep.git && cd fqgrep && make && mv fqgrep /usr/local/bin/ && cd ..
 
-# Get flexbar for adapter trimming - IN PROGRESS
-RUN wget https://github.com/seqan/flexbar/releases/download/v2.5.0/flexbar_v2.5_linux64.tgz
+# Get flexbar for adapter trimming - do I need to move that library somewhere?
+RUN wget https://github.com/seqan/flexbar/releases/download/v2.5.0/flexbar_v2.5_linux64.tgz && tar -xvzf flexbar_v2.5_linux64.tgz && mv flexbar_v2.5_linux64/flexbar /usr/local/bin/
+
+# Clone Tn-seq repo for necessary scripts
+RUN git clone https://github.com/khturner/Tn-seq.git
+# IN DEVELOPMENT - switch to dev branch - remove this when done
+RUN cd Tn-seq && git checkout dockerize && cd ..
 
