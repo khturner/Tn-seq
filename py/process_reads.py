@@ -27,12 +27,13 @@ print('Reads in file: ' + str(int(result.strip().split()[0]) / 4))
 # Report number of reads with primer
 print('### ' + time.strftime("%c") + ' ###')
 print('Searching for reads with primer...')
-p = subprocess.Popen(['fqgrep', '-m', str(args.mismatches), '-C', '-p', args.primer, args.read1],
-                     stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-result, err = p.communicate()
-if p.returncode != 0:
-  raise IOError(err)
-reads_with_primer = int(result.strip().split()[2])
+# OFF FOR DEBUGGING
+#p = subprocess.Popen(['fqgrep', '-m', str(args.mismatches), '-C', '-p', args.primer, args.read1],
+#                     stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+#result, err = p.communicate()
+#if p.returncode != 0:
+#  raise IOError(err)
+#reads_with_primer = int(result.strip().split()[2])
 # Was read 2 specified? Count it too if so
 if args.read2 is not None:
   p = subprocess.Popen(['fqgrep', '-m', str(args.mismatches), '-C', '-p', args.primer, args.read1],
@@ -41,33 +42,34 @@ if args.read2 is not None:
   if p.returncode != 0:
     raise IOError(err)
   reads_with_primer += int(result.strip().split()[2])
-print('Reads with primer: ' + str(reads_with_primer))
+#print('Reads with primer: ' + str(reads_with_primer))
 
 # Filter reads containing the expected Tn end
+# 11/24, 11pm: Something's screwy with this piping...
 print('### ' + time.strftime("%c") + ' ###')
 print('Searching for reads with an inverted repeat in the proper position on the read...')
 min_ir_position = len(args.primer) + len(args.invertedrepeat) + 2
 max_ir_position = len(args.primer) + len(args.invertedrepeat) + 8
-f = open(args.output + '.Tnreads.trimmed.fastq', 'aw')
-p = subprocess.Popen(['fqgrep', '-m', str(args.mismatches), '-r', '-p', args.primer + args.invertedrepeat, args.read2],
+f = open(args.output + '.Tnreads.trimmed.fastq', 'w')
+p = subprocess.Popen(['fqgrep', '-m', str(args.mismatches), '-r', '-p', args.primer + args.invertedrepeat, args.read1],
                      stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-p2 = subprocess.check_output(['awk', '-v', 'min=' + str(min_ir_position), '-v', 'max=' + str(max_ir_position), '-F', '"\t"',
-                              '\'(($8 >= min && $8 <= max) || $1 == "read name")\''],
-                             stdin = p.stdout, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-p3 = subprocess.check_output(['trimmer', '--5-prime'], stdin = p2.stdout, stdout = f, stderr = subprocess.PIPE)
+p2 = subprocess.Popen(['awk', '-v', 'min=' + str(min_ir_position), '-v', 'max=' + str(max_ir_position), '-F', '"\t"',
+                       '\'(($8 >= min && $8 <= max) || $1 == "read name")\''],
+                      stdin = p.stdout, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+p3 = subprocess.Popen(['trimmer', '--5-prime'], stdin = p2.stdout, stdout = f, stderr = subprocess.PIPE) # Hmm not writing anything
 result, err = p3.communicate()
 f.close()
-if p3.returncode != 0:
+if p2.returncode != 0:
   raise IOError(err)
 # Was read 2 specified? Include it too if so
 if args.read2 is not None:
   f = open(args.output + '.Tnreads.trimmed.fastq', 'aw')
   p = subprocess.Popen(['fqgrep', '-m', str(args.mismatches), '-r', '-p', args.primer + args.invertedrepeat, args.read2],
                        stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-  p2 = subprocess.check_output(['awk', '-v', 'min=' + str(min_ir_position), '-v', 'max=' + str(max_ir_position), '-F', '"\t"',
-                                '\'(($8 >= min && $8 <= max) || $1 == "read name")\''],
-                               stdin = p.stdout, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-  p3 = subprocess.check_output(['trimmer', '--5-prime'], stdin = p2.stdout, stdout = f, stderr = subprocess.PIPE)
+  p2 = subprocess.Popen(['awk', '-v', 'min=' + str(min_ir_position), '-v', 'max=' + str(max_ir_position), '-F', '"\t"',
+                         '\'(($8 >= min && $8 <= max) || $1 == "read name")\''],
+                        stdin = p.stdout, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+  p3 = subprocess.Popen(['trimmer', '--5-prime'], stdin = p2.stdout, stdout = f, stderr = subprocess.PIPE)
   result, err = p3.communicate()
   f.close()
   if p3.returncode != 0:
