@@ -27,16 +27,16 @@ print('Reads in file: ' + str(int(result.strip().split()[0]) / 4))
 # Report number of reads with primer
 print('### ' + time.strftime("%c") + ' ###')
 print('Searching for reads with primer...')
-p = subprocess.Popen(['fqgrep', '-m', args.mismatches, '-C', '-p', args.primer, args.read1],
-                     stdout = = subprocess.PIPE, stderr = subprocess.PIPE)
+p = subprocess.Popen(['fqgrep', '-m', str(args.mismatches), '-C', '-p', args.primer, args.read1],
+                     stdout = subprocess.PIPE, stderr = subprocess.PIPE)
 result, err = p.communicate()
 if p.returncode != 0:
   raise IOError(err)
 reads_with_primer = int(result.strip().split()[2])
 # Was read 2 specified? Count it too if so
-if def(args.read2):
-  p = subprocess.Popen(['fqgrep', '-m', args.mismatches, '-C', '-p', args.primer, args.read1],
-                       stdout = = subprocess.PIPE, stderr = subprocess.PIPE)
+if args.read2 is not None:
+  p = subprocess.Popen(['fqgrep', '-m', str(args.mismatches), '-C', '-p', args.primer, args.read1],
+                       stdout = subprocess.PIPE, stderr = subprocess.PIPE)
   result, err = p.communicate()
   if p.returncode != 0:
     raise IOError(err)
@@ -48,21 +48,21 @@ print('### ' + time.strftime("%c") + ' ###')
 print('Searching for reads with an inverted repeat in the proper position on the read...')
 min_ir_position = len(args.primer) + len(args.invertedrepeat) + 2
 max_ir_position = len(args.primer) + len(args.invertedrepeat) + 8
-p = subprocess.Popen(['fqgrep', '-m', args.mismatches, '-r', '-p', args.primer + args.invertedrepeat, args.read1,
-                      '|', 'awk', '-v', 'min=' + min_ir_position, '-v', 'max=' + max_ir_position, '-F', '"\t"',
+p = subprocess.Popen(['fqgrep', '-m', str(args.mismatches), '-r', '-p', args.primer + args.invertedrepeat, args.read1,
+                      '|', 'awk', '-v', 'min=' + str(min_ir_position), '-v', 'max=' + str(max_ir_position), '-F', '"\t"',
                       '\'(($8 >= min && $8 <= max) || $1 == "read name")\'',
                       '|', 'trimmer', '--5-prime', '>', args.output + '.Tnreads.trimmed.fastq'],
-                     stdout = = subprocess.PIPE, stderr = subprocess.PIPE)
+                     stdout = subprocess.PIPE, stderr = subprocess.PIPE)
 result, err = p.communicate()
 if p.returncode != 0:
   raise IOError(err)
 # Was read 2 specified? Include it too if so
-if def(args.read2):
-  p = subprocess.Popen(['fqgrep', '-m', args.mismatches, '-r', '-p', args.primer + args.invertedrepeat, args.read2,
-                        '|', 'awk', '-v', 'min=' + min_ir_position, '-v', 'max=' + max_ir_position, '-F', '"\t"',
+if args.read2 is not None:
+  p = subprocess.Popen(['fqgrep', '-m', str(args.mismatches), '-r', '-p', args.primer + args.invertedrepeat, args.read2,
+                        '|', 'awk', '-v', 'min=' + str(min_ir_position), '-v', 'max=' + str(max_ir_position), '-F', '"\t"',
                         '\'(($8 >= min && $8 <= max) || $1 == "read name")\'',
                         '|', 'trimmer', '--5-prime', '>>', args.output + '.Tnreads.trimmed.fastq'],
-                       stdout = = subprocess.PIPE, stderr = subprocess.PIPE)
+                       stdout = subprocess.PIPE, stderr = subprocess.PIPE)
   result, err = p.communicate()
   if p.returncode != 0:
     raise IOError(err)
