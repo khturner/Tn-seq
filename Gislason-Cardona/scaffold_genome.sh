@@ -31,4 +31,4 @@ aws s3 cp s3://cenocepacia-tnseq/k56.fasta ./
 # Next up, download the J2315 genome and try scaffolding it - IN PROGRESS
 wget ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/009/485/GCF_000009485.1_ASM948v1/GCF_000009485.1_ASM948v1_genomic.fna.gz
 gunzip GCF_000009485.1_ASM948v1_genomic.fna.gz
-pyScaf/pyScaf.py -f k56.fasta -t 4 --dotplot scafdots.png -r GCF_000009485.1_ASM948v1_genomic.fna -o k56_scaffolded.fna
+pyScaf/pyScaf.py -f k56.fasta -t 4 --dotplot png -g 1000000 -r GCF_000009485.1_ASM948v1_genomic.fna -o k56_scaffolded.fna
