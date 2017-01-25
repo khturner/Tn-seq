@@ -34,7 +34,7 @@ RUN wget https://download2.rstudio.org/rstudio-server-1.0.136-amd64.deb
 RUN gdebi rstudio-server-1.0.136-amd64.deb
 
 # FQGrep for read searching/filtering
-RUN git clone https://github.com/indraniel/fqgrep.git && cd fqgrep && make && cd ..
+RUN git clone https://github.com/indraniel/fqgrep.git && cd fqgrep && make && mv fqgrep /usr/local/bin/ && cd ..
 
 # Get flexbar for adapter trimming - IN PROGRESS
 RUN wget https://github.com/seqan/flexbar/releases/download/v2.5.0/flexbar_v2.5_linux64.tgz
