@@ -1,6 +1,7 @@
 library(DESeq2)
 library(mclust)
 library(seqinr)
+library(reshape2)
 library(tidyverse)
 
 args <- commandArgs(TRUE)
@@ -17,7 +18,7 @@ counts_files <- args[8:length(args)]
 
 # DEBUG
 reference_fasta <- "k56.fasta"
-reference_gff <- "k56.gff"
+reference_gff <- "k56.bycontig.gff"
 features_of_interest <- "gene"
 three_prime_trim <- 10 / 100
 ignore_sites <- 0
@@ -46,6 +47,7 @@ counts_data <- counts_data %>% group_by(counts_file, template) %>%
   mutate(adjustment_ratio = pred_num_reads / median(pred_num_reads),
          smoothed_num_reads = num_reads / adjustment_ratio) %>% ungroup
 
+# Genome size
 reference_genome <- read.fasta(reference_fasta)
 template_sizes <- data.frame(template = names(reference_genome),
                              template_length = unlist(lapply(reference_genome, length)),
@@ -67,7 +69,20 @@ for (counts_file_entry in unique(counts_data$counts_file)) {
   ggsave(paste0(counts_file_entry, ".loess.png"), p, scale = 2, height = 4, width = 6, units = "in")
 }
 
+# Generate pseudodata
+pseudocounts <- apply(template_sizes, 1, function(x) {
+  data.frame(template = x['template'], position = 1:x['template_length'], stringsAsFactors = F)
+}) %>% rbind_all %>% tbl_df 
+# Average counts/site for all datasets - YOU'RE HERE END OF 1/27/17
+pseudocounts <- counts_data %>% dcast(template + position ~ counts_file, value.var = "smoothed_num_reads", fill = 0) %>%
+  melt(id.vars = c("template", "position"), variable.name = "counts_file", value.name = "smoothed_num_reads") %>%
+  tbl_df %>% group_by(template, position) %>% summarize(avg_smoothed_num_reads = mean(smoothed_num_reads)) %>%
+  ungroup %>% left_join(pseudocounts, .) %>%
+  mutate(avg_smoothed_num_reads = ifelse(is.na(avg_smoothed_num_reads), 0, avg_smoothed_num_reads))
+
+
 # Read in features
 genome_features <- read_tsv(reference_gff, comment = "#",
                             col_names = c("template", "source", "feature", "start", "end", "score", "strand",
                                           "frame", "attribute"))
+
