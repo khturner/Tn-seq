@@ -66,3 +66,8 @@ for (counts_file_entry in unique(counts_data$counts_file)) {
     ggtitle("LOESS smoothing positional bias", counts_file_entry) + ylab("Number of reads") + xlab("Position")
   ggsave(paste0(counts_file_entry, ".loess.png"), p, scale = 2, height = 4, width = 6, units = "in")
 }
+
+# Read in features
+genome_features <- read_tsv(reference_gff, comment = "#",
+                            col_names = c("template", "source", "feature", "start", "end", "score", "strand",
+                                          "frame", "attribute"))
