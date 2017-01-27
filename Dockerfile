@@ -28,7 +28,7 @@ RUN gpg -a --export E084DAB9 | apt-key add -
 
 # Install key software and dependencies with apt-get
 RUN apt-get -y update
-RUN apt-get install -y r-base r-base-dev gdebi-core bowtie2 libtre-dev libtre5 zlib1g zlib1g-dev wget git awscli gawk libcurl4-openssl-dev
+RUN apt-get install -y r-base r-base-dev gdebi-core bowtie2 libtre-dev libtre5 zlib1g zlib1g-dev wget git awscli gawk libcurl4-openssl-dev libxml2-dev libssl-dev
 
 # Install Rstudio Server for interactive analyses
 RUN wget https://download2.rstudio.org/rstudio-server-1.0.136-amd64.deb
@@ -46,3 +46,7 @@ RUN git clone https://github.com/khturner/Tn-seq.git
 # IN DEVELOPMENT - switch to dev branch - remove this when done developing
 RUN cd Tn-seq && git checkout dockerize && cd ..
 
+# Install R packages
+RUN echo 'install.packages(c("tidyverse", "mclust"), repos="http://cran.us.r-project.org", dependencies=TRUE)' > /tmp/packages.R
+RUN echo 'install.packages("BiocInstaller", repos="http://bioconductor.org/packages/3.4/bioc"); source("http://bioconductor.org/biocLite.R"); biocLite("DESeq2")' >> /tmp/packages.R
+RUN Rscript /tmp/packages.R
