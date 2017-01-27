@@ -43,8 +43,8 @@ for (counts_file_entry in unique(counts_data$counts_file)) {
   counts_data %>% group_by(template) %>% filter(max(position) >= 10000) %>% # No short contigs
     # filter(counts_file == counts_file_entry) %>%
     ggplot(aes(position)) + theme_bw() + scale_x_continuous(labels = scales::comma) +
-    geom_point(aes(y = num_reads), color = "#e41a1c", alpha = 0.5) +
+    geom_point(aes(y = num_reads), color = "#e41a1c", alpha = 0.2) +
+    geom_point(aes(y = smoothed_num_reads), color = "#4daf4a", alpha = 0.2) + 
     geom_line(aes(y = pred_num_reads), color = "#377eb8") +
-    geom_point(aes(y = smoothed_num_reads), color = "#4daf4a", alpha = 0.5) + 
     facet_wrap(~template, scales = "free")
 }
