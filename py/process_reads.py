@@ -95,24 +95,25 @@ if not os.path.isfile(args.reference + '.1.bt2'):
 #result, err = p.communicate()
 #if p.returncode != 0:
 #  raise IOError(err)
-#print(err)
-
+#print(err) # Display bowtie2 mapping information
+print('')
 
 ## 1/25/17 - at here, have some test lines in a SAM file, next prototype the sorting/tallying lines
+# Generate tsv of reads per site
+print('### ' + time.strftime("%c") + ' ###')
+print('Summarizing mapping results and generating counts of reads per site...')
+cmd = 'grep -v \'^@\' ' + args.output + '.sam | gawk -F "\\t" \'and($2, 0x4) != 0x4 && length($10) >= 16\' | sort -u -k1,1 | awk -F "\\t" \'BEGIN { OFS = "\\t" } and($2, 0x100) != 0x100 { if (and($2, 0x10) != 0x10) print $3, $4; else print $3, $4+length($10) }\' | sort | uniq -c | gawk \'BEGIN { OFS="\\t"; print "template", "position", "num_reads" } { print $2, $3, $1 | "sort -nrk3" }\' > ' + args.output + '.sites.tsv'
+p = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+result, err = p.communicate()
+if p.returncode != 0:
+  raise IOError(err)
 
+p = subprocess.Popen(['wc', '-l', args.output + '.sites.tsv'], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+result, err = p.communicate()
+if p.returncode != 0:
+  raise IOError(err)
+print('Insertion sites identified : ' + str(int(result.strip().split()[0]) - 1))
+print('')
+print('### ' + time.strftime("%c") + ' ###')
+print('process_reads.py complete!')
 
-
-# Map and convert - feel free to change bowtie2 parameters yourself
-#echo "$PREFIX: Mapping with Bowtie2..."
-#echo "Bowtie2 report:" >> $PREFIX-TnSeq.txt
-#bowtie2 --end-to-end -p 16 -a -x $BOWTIEREF -U $PREFIX-IR-clip.fastq -S $PREFIX.sam 2>> $PREFIX-TnSeq.txt
-#grep '^@' $PREFIX.sam > $PREFIX-mapped.sam
-#cat $PREFIX.sam | grep -v '^@' | awk -F "\t" '(and($2, 0x4) != 0x4)' | sort -u -k1,1 >> $PREFIX-mapped.sam
-#echo "Number of reads mapping at high enough score:" >> $PREFIX-TnSeq.txt
-#cat $PREFIX-mapped.sam | wc -l >> $PREFIX-TnSeq.txt
-#echo "$PREFIX: Tallying mapping results..."
-#grep -v '^@' $PREFIX-mapped.sam | awk -F "\t" 'and($2, 0x100) != 0x100 {if (and($2, 0x10) != 0x10) print $4; else print $4+length($10)}' | grep '[0-9]' | sort | uniq -c | sort -#n -r > $PREFIX-sites.txt
-#echo "Number of insertion sites identified:" >> $PREFIX-TnSeq.txt
-#wc -l $PREFIX-sites.txt >> $PREFIX-TnSeq.txt
-#echo "Most frequent sites:" >> $PREFIX-TnSeq.txt
-#head $PREFIX-sites.txt >> $PREFIX-TnSeq.txt
