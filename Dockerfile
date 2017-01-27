@@ -47,6 +47,7 @@ RUN git clone https://github.com/khturner/Tn-seq.git
 RUN cd Tn-seq && git checkout dockerize && cd ..
 
 # Install R packages
-RUN echo 'install.packages(c("tidyverse", "mclust", "seqinr"), repos="http://cran.us.r-project.org", dependencies=TRUE)' > /tmp/packages.R
+RUN echo 'install.packages(c("tidyverse", "mclust", "seqinr", "devtools"), repos="http://cran.us.r-project.org", dependencies=TRUE)' > /tmp/packages.R
+RUN echo 'devtools::install_github("dgrtwo/fuzzyjoin")' >> /tmp/packages.R
 RUN echo 'install.packages("BiocInstaller", repos="http://bioconductor.org/packages/3.4/bioc"); source("http://bioconductor.org/biocLite.R"); biocLite("DESeq2")' >> /tmp/packages.R
 RUN Rscript /tmp/packages.R
