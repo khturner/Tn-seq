@@ -17,6 +17,7 @@ output_prefix <- args[7]
 counts_files <- args[8:length(args)]
 
 # DEBUG
+setwd("~/cenocepacia-s3/")
 reference_fasta <- "k56.fasta"
 reference_gff <- "k56.bycontig.gff"
 features_of_interest <- "gene"
@@ -24,7 +25,8 @@ three_prime_trim <- 10 / 100
 ignore_sites <- 0
 min_reads_per_site <- 1
 output_prefix <- "testan"
-counts_files <- "test.sites.tsv"
+counts_files <- c("500khdtm_14.sites.tsv", "500khdtm_15.sites.tsv",
+                  "1mhdtm_taq.sites.tsv")
 
 # read sites files
 counts_data <- data.frame()

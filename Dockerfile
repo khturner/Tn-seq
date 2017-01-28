@@ -48,7 +48,7 @@ RUN echo 'install.packages("BiocInstaller", repos="http://bioconductor.org/packa
 RUN Rscript /tmp/packages.R
 
 # Clone Tn-seq repo for necessary scripts
-RUN git clone http://github.com/khturner/Tn-seq.git
+RUN git clone https://github.com/khturner/Tn-seq.git
 # IN DEVELOPMENT - switch to dev branch - remove this when done developing
 RUN cd Tn-seq && git checkout dockerize && chmod a+x trimmer && mv trimmer /usr/local/bin/
 
