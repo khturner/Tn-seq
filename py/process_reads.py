@@ -53,7 +53,7 @@ min_ir_position = len(args.primer) + len(args.invertedrepeat) - 2
 max_ir_position = len(args.primer) + len(args.invertedrepeat) + 8
 cmd = 'fqgrep -m ' + str(args.mismatches) + ' -r -p ' + args.primer + args.invertedrepeat + ' ' + args.read1 + \
       ' | awk -v min=' + str(min_ir_position) + ' -v max=' + str(max_ir_position) + \
-      ' -F "\\t" \'(($8 >= min && $8 <= max) || $1 == "read name")\' | trimmer --5-prime > ' + \
+      ' -F "\\t" \'(($8 >= min && $8 <= max && length($10) >= (max + 16)) || $1 == "read name")\' | trimmer --5-prime > ' + \
       args.output + '.Tnreads.trimmed.fastq'
 p = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
 result, err = p.communicate()
@@ -63,7 +63,7 @@ if p.returncode != 0:
 if args.read2 is not None:
   cmd = 'fqgrep -m ' + str(args.mismatches) + ' -r -p ' + args.primer + args.invertedrepeat + ' ' + args.read2 + \
         ' | awk -v min=' + str(min_ir_position) + ' -v max=' + str(max_ir_position) + \
-        ' -F "\\t" \'(($8 >= min && $8 <= max) || $1 == "read name")\' | trimmer --5-prime >> ' + \
+        ' -F "\\t" \'(($8 >= min && $8 <= max && length($10) >= (max + 16)) || $1 == "read name")\' | trimmer --5-prime >> ' + \
         args.output + '.Tnreads.trimmed.fastq'
   p = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
   result, err = p.communicate()
@@ -96,7 +96,7 @@ print('')
 # Generate tsv of reads per site
 print('### ' + time.strftime("%c") + ' ###')
 print('Summarizing mapping results and generating counts of reads per site...')
-cmd = 'grep -v \'^@\' ' + args.output + '.sam | gawk -F "\\t" \'and($2, 0x4) != 0x4 && length($10) >= 16\' | sort -u -k1,1 | awk -F "\\t" \'BEGIN { OFS = "\\t" } and($2, 0x100) != 0x100 { if (and($2, 0x10) != 0x10) print $3, $4; else print $3, $4+length($10) }\' | sort | uniq -c | gawk \'BEGIN { OFS="\\t"; print "template", "position", "num_reads" } { print $2, $3, $1 | "sort -nrk3" }\' > ' + args.output + '.sites.tsv'
+cmd = 'grep -v \'^@\' ' + args.output + '.sam | gawk -F "\\t" \'and($2, 0x4) != 0x4\' | sort -u -k1,1 | awk -F "\\t" \'BEGIN { OFS = "\\t" } and($2, 0x100) != 0x100 { if (and($2, 0x10) != 0x10) print $3, $4; else print $3, $4+length($10) }\' | sort | uniq -c | gawk \'BEGIN { OFS="\\t"; print "template", "position", "num_reads" } { print $2, $3, $1 | "sort -nrk3" }\' > ' + args.output + '.sites.tsv'
 p = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
 result, err = p.communicate()
 if p.returncode != 0:
