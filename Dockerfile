@@ -51,3 +51,8 @@ RUN echo 'install.packages(c("tidyverse", "mclust", "seqinr", "devtools"), repos
 RUN echo 'devtools::install_github("dgrtwo/fuzzyjoin")' >> /tmp/packages.R
 RUN echo 'install.packages("BiocInstaller", repos="http://bioconductor.org/packages/3.4/bioc"); source("http://bioconductor.org/biocLite.R"); biocLite("DESeq2")' >> /tmp/packages.R
 RUN Rscript /tmp/packages.R
+
+# Move to script directory
+WORKDIR /root/Tn-seq/py
+ENV PATH /root/Tn-seq/py:$PATH
+

@@ -15,7 +15,6 @@ parser.add_argument('-t', '--threads', help = 'Number of compute threads', defau
 parser.add_argument('-o', '--output', help = 'Output file prefix', required = True)
 
 args = parser.parse_args()
-# print(args) # debug
 
 # Report number of reads
 print('### ' + time.strftime("%c") + ' ###')
@@ -30,13 +29,12 @@ print('')
 # Report number of reads with primer
 print('### ' + time.strftime("%c") + ' ###')
 print('Searching for reads with primer...')
-#DEBUG: skip computation
-#p = subprocess.Popen(['fqgrep', '-m', str(args.mismatches), '-C', '-p', args.primer, args.read1],
-#                     stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-#result, err = p.communicate()
-#if p.returncode != 0:
-#  raise IOError(err)
-#reads_with_primer = int(result.strip().split()[2])
+p = subprocess.Popen(['fqgrep', '-m', str(args.mismatches), '-C', '-p', args.primer, args.read1],
+                    stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+result, err = p.communicate()
+if p.returncode != 0:
+ raise IOError(err)
+reads_with_primer = int(result.strip().split()[2])
 # Was read 2 specified? Count it too if so
 if args.read2 is not None:
   p = subprocess.Popen(['fqgrep', '-m', str(args.mismatches), '-C', '-p', args.primer, args.read1],
@@ -45,11 +43,10 @@ if args.read2 is not None:
   if p.returncode != 0:
     raise IOError(err)
   reads_with_primer += int(result.strip().split()[2])
-#print('Reads with primer: ' + str(reads_with_primer))
+print('Reads with primer: ' + str(reads_with_primer))
 print('')
 
 # Filter reads containing the expected Tn end
-# Done for the night 11/24 - something's screwy here with this damn pipe
 print('### ' + time.strftime("%c") + ' ###')
 print('Searching for reads with an inverted repeat in the proper position on the read...')
 min_ir_position = len(args.primer) + len(args.invertedrepeat) - 2
@@ -58,12 +55,11 @@ cmd = 'fqgrep -m ' + str(args.mismatches) + ' -r -p ' + args.primer + args.inver
       ' | awk -v min=' + str(min_ir_position) + ' -v max=' + str(max_ir_position) + \
       ' -F "\\t" \'(($8 >= min && $8 <= max) || $1 == "read name")\' | trimmer --5-prime > ' + \
       args.output + '.Tnreads.trimmed.fastq'
-#DEBUG: skip computation
-#p = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-#result, err = p.communicate()
-#if p.returncode != 0:
-#  raise IOError(err)
-# Was read 2 specified? Include it too if so
+p = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+result, err = p.communicate()
+if p.returncode != 0:
+ raise IOError(err)
+Was read 2 specified? Include it too if so
 if args.read2 is not None:
   cmd = 'fqgrep -m ' + str(args.mismatches) + ' -r -p ' + args.primer + args.invertedrepeat + ' ' + args.read2 + \
         ' | awk -v min=' + str(min_ir_position) + ' -v max=' + str(max_ir_position) + \
@@ -88,17 +84,15 @@ if not os.path.isfile(args.reference + '.1.bt2'):
   result, err = p.communicate()
   if p.returncode != 0:
     raise IOError(err)
-#DEBUG: skip computation
-#p = subprocess.Popen(['bowtie2', '--end-to-end', '-p', str(args.threads), '-a', '-x', args.reference, '-U',
-#                      args.output + '.Tnreads.trimmed.fastq', '-S', args.output + '.sam'],
-#                     stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-#result, err = p.communicate()
-#if p.returncode != 0:
-#  raise IOError(err)
-#print(err) # Display bowtie2 mapping information
+p = subprocess.Popen(['bowtie2', '--end-to-end', '-p', str(args.threads), '-a', '-x', args.reference, '-U',
+                     args.output + '.Tnreads.trimmed.fastq', '-S', args.output + '.sam'],
+                    stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+result, err = p.communicate()
+if p.returncode != 0:
+ raise IOError(err)
+print(err) # Display bowtie2 mapping information
 print('')
 
-## 1/25/17 - at here, have some test lines in a SAM file, next prototype the sorting/tallying lines
 # Generate tsv of reads per site
 print('### ' + time.strftime("%c") + ' ###')
 print('Summarizing mapping results and generating counts of reads per site...')
