@@ -41,18 +41,17 @@ RUN git clone https://github.com/indraniel/fqgrep.git && cd fqgrep && make && mv
 # Commented cause I don't think I actually need it...
 # RUN wget https://github.com/seqan/flexbar/releases/download/v2.5.0/flexbar_v2.5_linux64.tgz && tar -xvzf flexbar_v2.5_linux64.tgz && mv flexbar_v2.5_linux64/flexbar /usr/local/bin/
 
-# Clone Tn-seq repo for necessary scripts
-RUN git clone https://github.com/khturner/Tn-seq.git
-# IN DEVELOPMENT - switch to dev branch - remove this when done developing
-RUN cd Tn-seq && git checkout dockerize && cd ..
-
 # Install R packages
 RUN echo 'install.packages(c("tidyverse", "mclust", "seqinr", "devtools"), repos="http://cran.us.r-project.org", dependencies=TRUE)' > /tmp/packages.R
 RUN echo 'devtools::install_github("dgrtwo/fuzzyjoin")' >> /tmp/packages.R
 RUN echo 'install.packages("BiocInstaller", repos="http://bioconductor.org/packages/3.4/bioc"); source("http://bioconductor.org/biocLite.R"); biocLite("DESeq2")' >> /tmp/packages.R
 RUN Rscript /tmp/packages.R
 
+# Clone Tn-seq repo for necessary scripts
+RUN git clone http://github.com/khturner/Tn-seq.git
+# IN DEVELOPMENT - switch to dev branch - remove this when done developing
+RUN cd Tn-seq && git checkout dockerize && chmod a+x trimmer && mv trimmer /usr/local/bin/
+
 # Move to script directory
 WORKDIR /root/Tn-seq/py
 ENV PATH /root/Tn-seq/py:$PATH
-
