@@ -32,7 +32,7 @@ RUN apt-get install -y r-base r-base-dev gdebi-core bowtie2 libtre-dev libtre5 z
 
 # Install Rstudio Server for interactive analyses
 RUN wget https://download2.rstudio.org/rstudio-server-1.0.136-amd64.deb
-RUN gdebi rstudio-server-1.0.136-amd64.deb
+RUN gdebi --non-interactive rstudio-server-1.0.136-amd64.deb
 
 # FQGrep for read searching/filtering
 RUN git clone https://github.com/indraniel/fqgrep.git && cd fqgrep && make && mv fqgrep /usr/local/bin/ && cd ..
