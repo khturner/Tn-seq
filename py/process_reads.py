@@ -59,7 +59,7 @@ p = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subpr
 result, err = p.communicate()
 if p.returncode != 0:
  raise IOError(err)
-Was read 2 specified? Include it too if so
+# Was read 2 specified? Include it too if so
 if args.read2 is not None:
   cmd = 'fqgrep -m ' + str(args.mismatches) + ' -r -p ' + args.primer + args.invertedrepeat + ' ' + args.read2 + \
         ' | awk -v min=' + str(min_ir_position) + ' -v max=' + str(max_ir_position) + \
