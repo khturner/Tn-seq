@@ -30,29 +30,30 @@ counts_with_gc <- counts_data %>% mutate(gc_content = map2(template, position, g
 # Visualization
 counts_with_gc %>% ggplot(aes(position, num_reads, color = gc_content)) + geom_point() +
   facet_wrap(~template, scales = "free") +
-  scale_color_distiller(palette = "Spectral") + theme_bw() +
-  scale_y_log10()
+  scale_color_distiller(palette = "Spectral") +
+  scale_y_log10() +
+  theme_bw() 
 
 # Can we model it?
 library(broom)
 # contig-position interaction, contig effect, global gc effect, no global position effect
-counts_modeled <- lm(log(num_reads) ~ gc_content + poly(position, 3) * template - poly(position, 3), counts_with_gc)
-counts_with_gc %>% add_predictions(counts_modeled) %>%
+counts_model <- lm(log(num_reads) ~ gc_content + poly(position, 3) * template - poly(position, 3), counts_with_gc)
+counts_with_gc %>% add_predictions(counts_model) %>%
   mutate(pred_num_reads = exp(pred)) %>%
   ggplot(aes(position)) +
   geom_point(aes(y = num_reads, color = gc_content)) +
   geom_line(aes(y = pred_num_reads), color = "blue") +
   facet_wrap(~template, scales = "free") +
   scale_color_distiller(palette = "Spectral") + theme_bw() +
-  scale_y_log10()
+  scale_y_log10() + annotation_logticks(sides = "l")
 
-# correct for pred
+# Correct for model prediction
 counts_with_gc %>% add_predictions(counts_modeled) %>%
   mutate(lnr = log(num_reads),
          correction_ratio = pred / mean(pred),
          smoothed_num_reads = exp(lnr / correction_ratio)) %>%
   ggplot(aes(position, color = gc_content)) +
   geom_point(aes(y = smoothed_num_reads)) +
-  # geom_point(aes(y = num_reads)) +
+  scale_y_log10() + annotation_logticks(sides = "l") +
   facet_wrap(~template, scales = "free") +
   scale_color_distiller(palette = "Spectral") + theme_bw()
