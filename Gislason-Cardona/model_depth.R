@@ -48,7 +48,7 @@ counts_with_gc %>% add_predictions(counts_model) %>%
   scale_y_log10() + annotation_logticks(sides = "l")
 
 # Correct for model prediction
-counts_with_gc %>% add_predictions(counts_modeled) %>%
+counts_with_gc %>% add_predictions(counts_model) %>%
   mutate(lnr = log(num_reads),
          correction_ratio = pred / mean(pred),
          smoothed_num_reads = exp(lnr / correction_ratio)) %>%
