@@ -29,3 +29,20 @@ ran again - 1m exconjugants, used Kapa polymerase for this one, better
 -Finally, she'll upload a little txt file with the transposon and primer seqs
 -Keith will work as much as possible in the git repo so work is recorded
   -Spin up a new EC2 instance, clone this repo, run setup.sh to install required tools
+
+## 2/20/17 - April - Keith
+### K56-2 genome Genome assembly
+- It's a PacBio, assembled with SMRT tools probably?
+- 50 Gb file of PacBio reads!!
+  - April will send me a link to an FTP host with it, also with shotgun Illumina
+  - TODO - download to S3, investigate, reassemble, annotated with Prokka
+  - 3 SMRT cells - 200x coverage - read N50 - 12k
+- ASM98130v1 - should be a genome announcement of the old genome, check it out
+- https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3798455/
+
+### Which Tnseq libraries
+- We'll figure it out later - does improving the genome make a difference?
+  - Might need to think about using the lower density library since it has less bias
+
+### Other stuff
+- Tn has pRhamnose, trim ~20% from 5' end
