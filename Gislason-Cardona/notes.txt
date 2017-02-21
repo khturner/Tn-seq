@@ -56,4 +56,5 @@ ran again - 1m exconjugants, used Kapa polymerase for this one, better
   b) big Ill library: K56-2-1383382_S1_L001_R?_001.fastq.gz
   c) PacBio CLR: (made from pbh5tools)
   d) PacBio CCS: (made from pbh5tools)
-- Let's just run the whole thing and see what happens?  
+- Let's just run the whole thing and see what happens?
+- If it's good, polish and fill gaps with https://sourceforge.net/projects/pb-jelly/
