@@ -46,3 +46,14 @@ ran again - 1m exconjugants, used Kapa polymerase for this one, better
 
 ### Other stuff
 - Tn has pRhamnose, trim ~20% from 5' end
+
+## 2/21/17 - Assembly notes
+- Downloading reads from Manitoba FTP site just fine
+- PacBio are in h5 format...
+  - Extract CLR/CCS as fastq with https://github.com/PacificBiosciences/pbh5tools
+- Possible SPAdes input data:
+  a) small Ill library: K56-2-1346455_S1_L001_R?_001.fastq.gz
+  b) big Ill library: K56-2-1383382_S1_L001_R?_001.fastq.gz
+  c) PacBio CLR: (made from pbh5tools)
+  d) PacBio CCS: (made from pbh5tools)
+- Let's just run the whole thing and see what happens?  
