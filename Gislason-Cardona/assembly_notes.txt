@@ -1,0 +1,7 @@
+## Hmm well I could do a whole bunch of command line stuff on Lakitu, but I'd have to mess with HDD size, etc.
+
+## Or perhaps I just want to do this HGAP style on an AMI?
+https://github.com/PacificBiosciences/Bioinformatics-Training/wiki/%22Installing%22-SMRT-Portal-the-easy-way---Launching-A-SMRT-Portal-AMI
+
+Oh yeah totes. OK so the reads are at s3://cenocepacia-tnseq/raw-reads.bas.h5.zip
+Get onto the AMI, aws s3 cp them, unzip them, boot up SMRT portal and do everything with SMRT portal
