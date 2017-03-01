@@ -190,7 +190,7 @@ dds <- DESeqDataSetFromMatrix(as.matrix(countData), colData, ~condition)
 rownames(dds) <- counts_per_gene$name
 colnames(dds) <- colnames(countData)
 sizeFactors(dds) <- rep(1, dim(dds)[2])
-dds <- estimateDispersions(dds)
+dds <- estimateDispersions(dds, fitType = "local") # Fix this...really slow
 dds <- nbinomLRT(dds, reduced = ~1)
 r <- results(dds) %>% tbl_df
 r$name <- rownames(r)
