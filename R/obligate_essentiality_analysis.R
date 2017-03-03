@@ -5,7 +5,6 @@ library(modelr)
 library(fuzzyjoin)
 library(DESeq2)
 library(reshape2)
-library(parallel)
 #library(mclust)
 
 args <- commandArgs(TRUE)
@@ -34,10 +33,11 @@ ignore_sites <- 100
 min_reads_per_site <- 2
 correct_gc_bias <- 1
 num_cpus <- 4
-num_pseudodata <- 50
+num_pseudodata <- 200
 attribute_tag <- "locus_tag"
-output_prefix <- "testan"
+output_prefix <- "testan_1m"
 counts_files <- c("1mhdtm_taq.sites.tsv", "1mhdtm_kapa.sites.tsv")
+counts_files <- "1mhdtm_taq.sites.tsv"
 
 ## Read sites files
 counts_data <- tibble()
@@ -62,7 +62,7 @@ get_window_gc <- function(template, pos) {
   end <- min(length(x), pos + 500)
   x[start:end] %>% GC
 }
-counts_with_gc <- counts_data %>% mutate(gc_content = map2(template, position, get_window_gc)) %>% unnest(gc_content)
+counts_data <- counts_data %>% mutate(gc_content = map2(template, position, get_window_gc)) %>% unnest(gc_content)
 
 ## Correct positional and gc content bias (optional)
 # Model on position and/or gc content
@@ -77,10 +77,11 @@ if (correct_gc_bias) {
   }
 }
 # Apply model to each counts_file separately, store predictions
-counts_with_predictions <- counts_with_gc %>%
+counts_with_predictions <- counts_data %>%
   group_by(counts_file) %>% nest %>% mutate(model = map(data, counts_model)) %>%
   mutate(preds = map2(data, model, add_predictions)) %>% unnest(preds) %>%
   mutate(pred_num_reads = exp(pred))
+
 
 # Visualize raw data with model
 for (c in unique(counts_with_predictions$counts_file)) {
@@ -113,7 +114,7 @@ for (c in unique(smoothed_counts_data$counts_file)) {
          width = 12, height = 7, units = "in")
 }
 
-## Normalize smoothed read counts - TODO
+## Normalize smoothed read counts
 obs_counts_files <- unique(smoothed_counts_data$counts_file)
 if (length(obs_counts_files) > 1) {
   smoothed_counts_data_cast <- smoothed_counts_data %>%
@@ -132,8 +133,12 @@ if (length(obs_counts_files) > 1) {
     filter(normalized_num_reads > 0)
 } else {
   norm_counts_data <- smoothed_counts_data %>%
+    mutate(smoothed_num_reads = round(smoothed_num_reads)) %>% 
     select(counts_file, template, position, normalized_num_reads = smoothed_num_reads)
 }
+
+# Output smoothed, normalized read count data
+write_tsv(norm_counts_data, paste0(output_prefix, ".smoothed.normalized.counts.tsv"))
 
 ## Tally reads per gene
 genome_features <- read_tsv(reference_gff, comment = "#",
@@ -161,6 +166,7 @@ tally_reads_per_gene <- function(d) {
     right_join(select(genome_features, name)) %>%
     dcast(name ~ counts_file, fill = 0) %>% tbl_df
   if ("NA" %in% colnames(d)) { d <- select(d,-`NA`) }
+  d <- cbind(d[,1], apply(d[,-1], 2, function (x) x + 1)) %>% tbl_df # Add one to avoid divide by 0 later
   return(d)
 }
 counts_per_gene <- tally_reads_per_gene(norm_counts_data)
@@ -173,11 +179,12 @@ resample_positions <- function(d, max_position) {
   d$position <- sample(1:max_position, nrow(d))
   return(d)
 }
-counts_pseudodata <- mclapply(1:num_pseudodata, function(x) {
+counts_pseudodata <- lapply(1:num_pseudodata, function(x) {
   tmp_df %>% mutate(data = map2(data, template_length, resample_positions)) %>%
     unnest(data) %>% select(-template_length) %>%
     tally_reads_per_gene %>% mutate(pseudodata_rep = paste0("pseudo_", x))
-}, mc.cores = num_cpus) %>% bind_rows %>%
+}) %>% bind_rows
+counts_pseudodata <- counts_pseudodata %>%
   melt(id.vars = c("name", "pseudodata_rep"),
        variable.name = "counts_file", value.name = "total_reads") %>%
   dcast(name ~ counts_file + pseudodata_rep) %>% tbl_df
@@ -190,7 +197,9 @@ dds <- DESeqDataSetFromMatrix(as.matrix(countData), colData, ~condition)
 rownames(dds) <- counts_per_gene$name
 colnames(dds) <- colnames(countData)
 sizeFactors(dds) <- rep(1, dim(dds)[2])
-dds <- estimateDispersions(dds, fitType = "local") # Fix this...really slow
+system.time({ dds <- estimateDispersions(dds, fitType = "local") }) # Really slow for lots of pseudoreps. Can we speed it up with a different estimate? Check out the plot and see if there's a good guesstimate function that would map basemean to dispersion...
 dds <- nbinomLRT(dds, reduced = ~1)
-r <- results(dds) %>% tbl_df
-r$name <- rownames(r)
+r <- results(dds, tidy = T) %>% cbind(sapply(levels(dds$condition), function(lvl)
+  rowMeans(counts(dds, normalized=TRUE)[,dds$condition == lvl]))) %>% tbl_df
+
+## mclust to find the essential peak

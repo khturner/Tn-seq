@@ -58,3 +58,8 @@ ran again - 1m exconjugants, used Kapa polymerase for this one, better
   d) PacBio CCS: (made from pbh5tools)
 - Let's just run the whole thing and see what happens?
 - If it's good, polish and fill gaps with https://sourceforge.net/projects/pb-jelly/
+
+## 2/28/17
+- Giving up on assembly, reads not long enough to span the 38 kb island
+- However, April had a good idea - correct reads by shotgun library coverage!
+  - Try it out in shotgun_pileup.sh

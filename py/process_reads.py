@@ -4,7 +4,7 @@ import time
 import subprocess
 import os.path
 
-parser = argparse.ArgumentParser(description = 'Process a TnSeq sequencing run to prepare a count of reads per insertion site, suitable for conditional or absolute essentiality analysis')
+parser = argparse.ArgumentParser(description = 'Process a TnSeq sequencing run to prepare a count of reads per insertion site, suitable for conditional or obligate essentiality analysis')
 parser.add_argument('-r', '--reference', help = 'Reference genome to map against (FASTA)', required = True)
 parser.add_argument('-p', '--primer', help = 'Sequence of the primer used to amplify your TnSeq library', required = True)
 parser.add_argument('-i', '--invertedrepeat', help = 'Sequence of the Tn end after your primer sequence but before the insertion site', required = True)
@@ -84,7 +84,7 @@ if not os.path.isfile(args.reference + '.1.bt2'):
   result, err = p.communicate()
   if p.returncode != 0:
     raise IOError(err)
-p = subprocess.Popen(['bowtie2', '--end-to-end', '-p', str(args.threads), '-a', '-x', args.reference, '-U',
+p = subprocess.Popen(['bowtie2', '--end-to-end', '-p', str(args.threads), '-x', args.reference, '-U',
                      args.output + '.Tnreads.trimmed.fastq', '-S', args.output + '.sam'],
                     stdout = subprocess.PIPE, stderr = subprocess.PIPE)
 result, err = p.communicate()
