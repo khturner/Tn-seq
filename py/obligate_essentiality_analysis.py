@@ -6,7 +6,7 @@ import subprocess
 parser = argparse.ArgumentParser(description = 'Perform obligate essentiality analysis on TnSeq insertion site count data')
 parser.add_argument('-r', '--reference', help = 'Reference genome to map against (FASTA)', required = True)
 parser.add_argument('-g', '--gff', help = 'GFF file describing genomic annotations', required = True)
-parser.add_argument('-f', '--features', help = 'Features of interest to consider in essentiality analysis (default: %(default)s)', default = 'gene')
+parser.add_argument('-f', '--features', help = 'Features of interest to consider in essentiality analysis (default: %(default)s)', default = 'CDS')
 parser.add_argument('-5', '--fiveprimetrim', help = 'Percent of the 5\' end of genes to ignore insertions in (default: %(default)s)', default = 0)
 parser.add_argument('-3', '--threeprimetrim', help = 'Percent of the 3\' end of genes to ignore insertions in (default: %(default)s)', default = 10)
 parser.add_argument('-i', '--ignore', help = 'Number of highest-read sites to ignore (default: %(default)s)', default = 0)
@@ -26,9 +26,8 @@ else:
 cmd = ['Rscript', '--vanilla', sys.path[0] + '/../R/obligate_essentiality_analysis.R', args.reference, args.gff, args.features,
        str(args.fiveprimetrim), str(args.threeprimetrim), str(args.ignore), str(args.minreads), correct_gc_bias, args.pseudoreps,
        args.attributetag, args.output] + args.control
-print(cmd)
-#p = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-#result, err = p.communicate()
-#if p.returncode != 0:
-#  raise IOError(err)
-#print(result)
+p = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+result, err = p.communicate()
+if p.returncode != 0:
+  raise IOError(err)
+print(result)
