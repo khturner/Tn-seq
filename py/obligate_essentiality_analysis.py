@@ -24,8 +24,9 @@ if args.correctgc:
 else:
   correct_gc_bias = 0
 cmd = ['Rscript', '--vanilla', sys.path[0] + '/../R/obligate_essentiality_analysis.R', args.reference, args.gff, args.features,
-       str(args.fiveprimetrim), str(args.threeprimetrim), str(args.ignore), str(args.minreads), correct_gc_bias, args.pseudoreps,
+       str(args.fiveprimetrim), str(args.threeprimetrim), str(args.ignore), str(args.minreads), str(correct_gc_bias), str(args.pseudoreps),
        args.attributetag, args.output] + args.control
+print(cmd)
 p = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
 result, err = p.communicate()
 if p.returncode != 0:
