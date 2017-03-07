@@ -93,7 +93,8 @@ for (c in unique(counts_with_predictions$counts_file)) {
     facet_wrap(~template, scales = "free") +
     scale_color_distiller(palette = "Spectral") + theme_bw() +
     scale_y_log10("Reads per site") + annotation_logticks(sides = "l")
-  ggsave(paste(output_prefix, c, "observed.png", sep = "."), p,
+  c_path <- strsplit(c, "/")[[1]]
+  ggsave(paste(c(c_path[-length(c_path)], paste(output_prefix, c_path[length(c_path)], "observed.png", sep = ".")), collapse = "/"), p,
          width = 12, height = 7, units = "in")
 }
 
@@ -111,7 +112,8 @@ for (c in unique(smoothed_counts_data$counts_file)) {
     facet_wrap(~template, scales = "free") +
     scale_color_distiller(palette = "Spectral") + theme_bw() +
     scale_y_log10("Smoothed reads per site") + annotation_logticks(sides = "l")
-  ggsave(paste(output_prefix, c, "smoothed.png", sep = "."), p,
+  c_path <- strsplit(c, "/")[[1]]
+  ggsave(paste(c(c_path[-length(c_path)], paste(output_prefix, c_path[length(c_path)], "smoothed.png", sep = ".")), collapse = "/"), p,
          width = 12, height = 7, units = "in")
 }
 

@@ -14,7 +14,7 @@
 ### sudo docker login
 
 # And finally build the docker image and push it
-### docker build -t khturner/tn-seq Tn-seq/Gislason-Cardona/
+### docker build -t khturner/tn-seq Tn-seq/
 ### sudo docker push khturner/tn-seq
 
 FROM ubuntu:latest
