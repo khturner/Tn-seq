@@ -172,6 +172,8 @@ tally_reads_per_gene <- function(d) {
   d <- cbind(d[,1], apply(d[,-1], 2, function (x) x + 1)) %>% tbl_df # Add one to avoid divide by 0 later
   return(d)
 }
+### DEBUG
+print(norm_counts_data)
 counts_per_gene <- tally_reads_per_gene(norm_counts_data)
 
 ## Sample over position to build pseudodata
