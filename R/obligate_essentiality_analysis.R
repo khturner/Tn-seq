@@ -5,7 +5,8 @@ library(modelr)
 library(fuzzyjoin)
 library(DESeq2)
 library(reshape2)
-#library(mclust)
+library(edgeR)
+library(mclust)
 
 args <- commandArgs(TRUE)
 
@@ -13,31 +14,31 @@ args <- commandArgs(TRUE)
 reference_fasta <- args[1]
 reference_gff <- args[2]
 features_of_interest <- args[3]
-three_prime_trim <- as.integer(args[4]) / 100
-ignore_sites <- as.integer(args[5])
-min_reads_per_site <- as.integer(args[6])
-correct_gc_bias <- as.integer(args[7]) # 0 or 1
-num_cpus <- as.integer(args[8])
+five_prime_trim <- as.integer(args[4]) / 100
+three_prime_trim <- as.integer(args[5]) / 100
+ignore_sites <- as.integer(args[6])
+min_reads_per_site <- as.integer(args[7])
+correct_gc_bias <- as.integer(args[8]) # 0 or 1
 num_pseudodata <- as.integer(args[9])
 attribute_tag <- args[10]
 output_prefix <- args[11]
 counts_files <- args[12:length(args)]
 
 # DEBUG
-setwd("~/cenocepacia-s3/")
-reference_fasta <- "k56.fasta"
-reference_gff <- "k56.bycontig.gff"
-features_of_interest <- "CDS"
-three_prime_trim <- 10 / 100
-ignore_sites <- 100
-min_reads_per_site <- 2
-correct_gc_bias <- 1
-num_cpus <- 4
-num_pseudodata <- 200
-attribute_tag <- "locus_tag"
-output_prefix <- "testan_1m"
-counts_files <- c("1mhdtm_taq.sites.tsv", "1mhdtm_kapa.sites.tsv")
-counts_files <- "1mhdtm_taq.sites.tsv"
+# setwd("~/cenocepacia-s3/")
+# reference_fasta <- "k56.fasta"
+# reference_gff <- "k56.bycontig.gff"
+# features_of_interest <- "CDS"
+# five_prime_trim <- 10 / 100
+# three_prime_trim <- 10 / 100
+# ignore_sites <- 100
+# min_reads_per_site <- 2
+# correct_gc_bias <- 1
+# num_pseudodata <- 2000
+# attribute_tag <- "locus_tag"
+# output_prefix <- "testan_1m"
+# counts_files <- c("1mhdtm_taq.sites.tsv", "1mhdtm_kapa.sites.tsv")
+# counts_files <- "1mhdtm_taq.sites.tsv"
 
 ## Read sites files
 counts_data <- tibble()
@@ -49,6 +50,7 @@ for (counts_file in counts_files) {
     mutate(counts_file = counts_file) %>% bind_rows(counts_data, .)
 }
 counts_data <- counts_data %>% arrange(counts_file, template, position)
+if (nrow(counts_data) == 0) { stop("Not enough counts data found") }
 
 ## Read genome, calculate sizes
 reference_genome <- read.fasta(reference_fasta)
@@ -78,10 +80,9 @@ if (correct_gc_bias) {
 }
 # Apply model to each counts_file separately, store predictions
 counts_with_predictions <- counts_data %>%
-  group_by(counts_file) %>% nest %>% mutate(model = map(data, counts_model)) %>%
+  group_by(counts_file) %>% nest %>% mutate(model = purrr::map(data, counts_model)) %>%
   mutate(preds = map2(data, model, add_predictions)) %>% unnest(preds) %>%
   mutate(pred_num_reads = exp(pred))
-
 
 # Visualize raw data with model
 for (c in unique(counts_with_predictions$counts_file)) {
@@ -114,7 +115,7 @@ for (c in unique(smoothed_counts_data$counts_file)) {
          width = 12, height = 7, units = "in")
 }
 
-## Normalize smoothed read counts
+## Normalize smoothed read counts with DESeq
 obs_counts_files <- unique(smoothed_counts_data$counts_file)
 if (length(obs_counts_files) > 1) {
   smoothed_counts_data_cast <- smoothed_counts_data %>%
@@ -147,9 +148,9 @@ genome_features <- read_tsv(reference_gff, comment = "#",
   filter(feature == features_of_interest) %>%
   mutate(genelength = end - start + 1,
          start = round(ifelse(strand == "-",
-                              start + genelength * three_prime_trim, start)),
+                              start + genelength * three_prime_trim, start + genelength * five_prime_trim)),
          end = round(ifelse(strand == "+",
-                            end - genelength * three_prime_trim, end)),
+                            end - genelength * three_prime_trim, end - genelength * five_prime_trim)),
          name = gsub(paste0(".*;", attribute_tag, "=([^;]*).*"), "\\1", attribute)) %>%
   select(template, start, end, name, attribute)
 
@@ -182,24 +183,32 @@ resample_positions <- function(d, max_position) {
 counts_pseudodata <- lapply(1:num_pseudodata, function(x) {
   tmp_df %>% mutate(data = map2(data, template_length, resample_positions)) %>%
     unnest(data) %>% select(-template_length) %>%
-    tally_reads_per_gene %>% mutate(pseudodata_rep = paste0("pseudo_", x))
+    tally_reads_per_gene %>% mutate(pseudodata_rep = x)
 }) %>% bind_rows
-counts_pseudodata <- counts_pseudodata %>%
+wide_counts_pseudodata <- counts_pseudodata %>%
+  mutate(pseudodata_rep = paste0("pseudo_", pseudodata_rep)) %>%
   melt(id.vars = c("name", "pseudodata_rep"),
        variable.name = "counts_file", value.name = "total_reads") %>%
   dcast(name ~ counts_file + pseudodata_rep) %>% tbl_df
 
-## Run DESeq2 on real and pseudodata
-countData <- inner_join(counts_per_gene, counts_pseudodata) %>% select(-name)
-colData <- tibble(condition = c(rep("Observed", length(obs_counts_files)),
-                                rep("Pseudodata", num_pseudodata * length(obs_counts_files))))
-dds <- DESeqDataSetFromMatrix(as.matrix(countData), colData, ~condition)
-rownames(dds) <- counts_per_gene$name
-colnames(dds) <- colnames(countData)
-sizeFactors(dds) <- rep(1, dim(dds)[2])
-system.time({ dds <- estimateDispersions(dds, fitType = "local") }) # Really slow for lots of pseudoreps. Can we speed it up with a different estimate? Check out the plot and see if there's a good guesstimate function that would map basemean to dispersion...
-dds <- nbinomLRT(dds, reduced = ~1)
-r <- results(dds, tidy = T) %>% cbind(sapply(levels(dds$condition), function(lvl)
-  rowMeans(counts(dds, normalized=TRUE)[,dds$condition == lvl]))) %>% tbl_df
+## Calculate differentially abundant mutants with edgeR (chosen over DESeq2 for massive speed improvement)
+countData <- inner_join(counts_per_gene, wide_counts_pseudodata) %>% select(-name)
+dl <- DGEList(counts = countData, group = c(rep("Observed", length(obs_counts_files)),
+                                            rep("Pseudodata", num_pseudodata * length(obs_counts_files))))
+system.time({dl <- estimateDisp(dl)})
+et <- exactTest(dl)
+res <- tibble(name = counts_per_gene$name,
+              log_fold_change = -et$table$logFC, edgeR_pvalue = et$table$PValue,
+              mean_observed_counts = rowMeans(countData[,1:length(obs_counts_files)]),
+              mean_pseudodata_counts = rowMeans(countData[,-(1:length(obs_counts_files))]))
 
 ## mclust to find the essential peak
+mc <- Mclust(res$log_fold_change, G = 1:2)
+res$classification <- mc$classification
+res$classification_uncertainty <- mc$uncertainty
+res <- res %>% mutate(classification = ifelse(classification == 1 & log_fold_change < 0, "Reduced", "Unchanged"), # Which genes are in reduced peak?
+                      classification_uncertainty = ifelse(log_fold_change > 0, 0, classification_uncertainty), # 100% certain if mutants more prevalent than exp.
+                      essential = classification == "Reduced" & edgeR_pvalue < 0.05 & classification_uncertainty < 0.05)
+
+## Output final data
+write_tsv(res, paste0(output_prefix, ".essential.genes.tsv"))

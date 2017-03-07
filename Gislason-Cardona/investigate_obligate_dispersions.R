@@ -60,3 +60,12 @@ for (i in 1:100) {
                      basemean = rowMeans(counts(dds, normalized = T)),
                      dispersion = dispersions(dds)))
 }
+
+means_dispersions %>% qplot(basemean, dispersion, geom = "density2d", data = .) +
+  scale_x_log10() + scale_y_log10()
+
+means_dispersions %>% group_by(genes) %>%
+  summarize(basemean = mean(basemean), dispersion = mean(dispersion)) %>%
+  qplot(basemean, dispersion, data = .) +
+  scale_x_log10() + scale_y_log10()
+

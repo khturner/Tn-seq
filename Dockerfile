@@ -44,7 +44,7 @@ RUN git clone https://github.com/indraniel/fqgrep.git && cd fqgrep && make && mv
 # Install R packages
 RUN echo 'install.packages(c("tidyverse", "mclust", "seqinr", "devtools"), repos="http://cran.us.r-project.org", dependencies=TRUE)' > /tmp/packages.R
 RUN echo 'devtools::install_github("dgrtwo/fuzzyjoin")' >> /tmp/packages.R
-RUN echo 'install.packages("BiocInstaller", repos="http://bioconductor.org/packages/3.4/bioc"); source("http://bioconductor.org/biocLite.R"); biocLite("DESeq2")' >> /tmp/packages.R
+RUN echo 'install.packages("BiocInstaller", repos="http://bioconductor.org/packages/3.4/bioc"); source("http://bioconductor.org/biocLite.R"); biocLite("DESeq2"); biocLite("edgeR")' >> /tmp/packages.R
 RUN Rscript /tmp/packages.R
 
 # Clone Tn-seq repo for necessary scripts
