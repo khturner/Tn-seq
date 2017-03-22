@@ -14,7 +14,7 @@ parser.add_argument('-m', '--minreads', help = 'Minimum number of reads required
 parser.add_argument('--correctgc', help = 'Include local GC content in smoothing model (default: %(default)s)', default = True)
 parser.add_argument('-p', '--pseudoreps', help = 'Number of pseudodata reps to calculate (default: %(default)s, >2,000 suggested for final data)', default = 100)
 parser.add_argument('-a', '--attributetag', help = 'Tag in GFF attributes containing gene name (default: %(default)s', default = 'locus_tag')
-parser.add_argument('-o', '--output', help = 'Output file prefix', required = True)
+parser.add_argument('-o', '--output', help = 'Output file directory', required = True)
 parser.add_argument('-c', '--control', help = 'Insertion site read count data TSV file (specify additional times for replicates)', nargs = '+', required = True)
 
 args = parser.parse_args()

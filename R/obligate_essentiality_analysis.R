@@ -22,7 +22,7 @@ min_reads_per_site <- as.integer(args[7])
 correct_gc_bias <- as.integer(args[8]) # 0 or 1
 num_pseudodata <- as.integer(args[9])
 attribute_tag <- args[10]
-output_prefix <- args[11]
+output_dir <- gsub("/$", "", args[11])
 counts_files <- args[12:length(args)]
 
 # DEBUG
@@ -37,7 +37,7 @@ counts_files <- args[12:length(args)]
 # correct_gc_bias <- 1
 # num_pseudodata <- 500
 # attribute_tag <- "locus_tag"
-# output_prefix <- "testan_1m"
+# output_dir <- "test"
 # counts_files <- c("1mhdtm_taq.sites.tsv", "1mhdtm_kapa.sites.tsv")
 # counts_files <- "1mhdtm_taq.sites.tsv"
 
@@ -95,8 +95,7 @@ for (c in unique(counts_with_predictions$counts_file)) {
     scale_color_distiller(palette = "Spectral") + theme_bw() +
     scale_y_log10("Reads per site") + annotation_logticks(sides = "l")
   c_path <- strsplit(c, "/")[[1]]
-  ggsave(paste(c(c_path[-length(c_path)], paste(output_prefix, c_path[length(c_path)], "observed.png", sep = ".")), collapse = "/"), p,
-         width = 12, height = 7, units = "in")
+  ggsave(paste0(output_dir, "/", c, ".observed.png"), p, width = 12, height = 7, units = "in")
 }
 
 # Smooth number of reads per site by dividing by the ratio of predicted num_reads
@@ -114,8 +113,7 @@ for (c in unique(smoothed_counts_data$counts_file)) {
     scale_color_distiller(palette = "Spectral") + theme_bw() +
     scale_y_log10("Smoothed reads per site") + annotation_logticks(sides = "l")
   c_path <- strsplit(c, "/")[[1]]
-  ggsave(paste(c(c_path[-length(c_path)], paste(output_prefix, c_path[length(c_path)], "smoothed.png", sep = ".")), collapse = "/"), p,
-         width = 12, height = 7, units = "in")
+  ggsave(paste0(output_dir, "/", c, ".smoothed.png"), p, width = 12, height = 7, units = "in")
 }
 
 ## Normalize smoothed read counts with DESeq
@@ -142,7 +140,7 @@ if (length(obs_counts_files) > 1) {
 }
 
 # Output smoothed, normalized read count data
-write_tsv(norm_counts_data, paste0(output_prefix, ".smoothed.normalized.counts.tsv"))
+write_tsv(norm_counts_data, paste0(output_dir, "/smoothed.normalized.counts.tsv"))
 
 ## Tally reads per gene
 genome_features <- read_tsv(reference_gff, comment = "#",
@@ -215,4 +213,4 @@ res <- res %>% mutate(classification = ifelse(classification == 1 & log_fold_cha
                       essential = classification == "Reduced" & edgeR_pvalue < 0.05 & classification_uncertainty < 0.05)
 
 ## Output final data
-write_tsv(res, paste0(output_prefix, ".essential.genes.tsv"))
+write_tsv(res, paste0(output_dir, "/essential.genes.tsv"))
