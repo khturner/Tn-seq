@@ -94,7 +94,7 @@ for (c in unique(counts_with_predictions$counts_file)) {
     facet_wrap(~template, scales = "free") +
     scale_color_distiller(palette = "Spectral") + theme_bw() +
     scale_y_log10("Reads per site") + annotation_logticks(sides = "l")
-  c_path <- strsplit(c, "/")[[1]]
+  c <- gsub(".*/", "", c) # Only terminal filename
   ggsave(paste0(output_dir, "/", c, ".observed.png"), p, width = 12, height = 7, units = "in")
 }
 
@@ -112,7 +112,7 @@ for (c in unique(smoothed_counts_data$counts_file)) {
     facet_wrap(~template, scales = "free") +
     scale_color_distiller(palette = "Spectral") + theme_bw() +
     scale_y_log10("Smoothed reads per site") + annotation_logticks(sides = "l")
-  c_path <- strsplit(c, "/")[[1]]
+  c <- gsub(".*/", "", c) # Only terminal filename
   ggsave(paste0(output_dir, "/", c, ".smoothed.png"), p, width = 12, height = 7, units = "in")
 }
 
