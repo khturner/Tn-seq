@@ -1,6 +1,7 @@
 library(tidyverse)
 library(seqinr)
 library(modelr)
+library(stringr)
 # devtools::install_github("dgrtwo/fuzzyjoin")
 library(fuzzyjoin)
 library(DESeq2)
@@ -34,7 +35,7 @@ counts_files <- args[12:length(args)]
 # ignore_sites <- 100
 # min_reads_per_site <- 2
 # correct_gc_bias <- 1
-# num_pseudodata <- 2000
+# num_pseudodata <- 500
 # attribute_tag <- "locus_tag"
 # output_prefix <- "testan_1m"
 # counts_files <- c("1mhdtm_taq.sites.tsv", "1mhdtm_kapa.sites.tsv")
@@ -152,9 +153,9 @@ genome_features <- read_tsv(reference_gff, comment = "#",
          start = round(ifelse(strand == "-",
                               start + genelength * three_prime_trim, start + genelength * five_prime_trim)),
          end = round(ifelse(strand == "+",
-                            end - genelength * three_prime_trim, end - genelength * five_prime_trim)),
-         name = gsub(paste0(".*;", attribute_tag, "=([^;]*).*"), "\\1", attribute)) %>%
-  select(template, start, end, name, attribute)
+                            end - genelength * three_prime_trim, end - genelength * five_prime_trim))) %>%
+  select(template, start, end, attribute)
+genome_features$name <- str_match(genome_features$attribute, paste0(attribute_tag, "=([^;]*);"))[,2]
 
 tally_reads_per_gene <- function(d) {
   d <- d %>% mutate(start = position, end = position) %>%
@@ -173,7 +174,6 @@ tally_reads_per_gene <- function(d) {
   return(d)
 }
 ### DEBUG
-print(norm_counts_data)
 counts_per_gene <- tally_reads_per_gene(norm_counts_data)
 
 ## Sample over position to build pseudodata
@@ -199,7 +199,7 @@ wide_counts_pseudodata <- counts_pseudodata %>%
 countData <- inner_join(counts_per_gene, wide_counts_pseudodata) %>% select(-name)
 dl <- DGEList(counts = countData, group = c(rep("Observed", length(obs_counts_files)),
                                             rep("Pseudodata", num_pseudodata * length(obs_counts_files))))
-system.time({dl <- estimateDisp(dl)})
+dl <- estimateDisp(dl)
 et <- exactTest(dl)
 res <- tibble(name = counts_per_gene$name,
               log_fold_change = -et$table$logFC, edgeR_pvalue = et$table$PValue,
