@@ -41,6 +41,8 @@ counts_files <- args[12:length(args)]
 # counts_files <- c("1mhdtm_taq.sites.tsv", "1mhdtm_kapa.sites.tsv")
 # counts_files <- "1mhdtm_taq.sites.tsv"
 
+dir.create(output_dir, showWarnings = F, recursive = T)
+
 ## Read sites files
 counts_data <- tibble()
 for (counts_file in counts_files) {
